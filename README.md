@@ -7,6 +7,9 @@ Programming projects that I have written at university
 - [Project 3](/cmpe150/project3) `Java`
 
 ### [CmpE160 - Introduction to Object Oriented Programming](/cmpe160)
+- [Project 1](/cmpe160/project1) `Java`
+- [Project 2](/cmpe160/project2) `Java`
+- [Project 3](/cmpe160/project3) `Java`
 
 ### [CmpE230 - Systems Programming](/cmpe230)
 - [Project 1](/cmpe230/project1) `C++`
