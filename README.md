@@ -2,6 +2,9 @@
 Programming projects that I have written at university
 
 ### [CmpE150 - Introduction to Computing](/cmpe150)
+- [Project 1](/cmpe150/project1) `Java`
+- [Project 2](/cmpe150/project2) `Java`
+- [Project 3](/cmpe150/project3) `Java`
 
 ### [CmpE160 - Introduction to Object Oriented Programming](/cmpe160)
 
