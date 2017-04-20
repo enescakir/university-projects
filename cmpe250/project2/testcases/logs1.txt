@@ -1,0 +1,237 @@
+T:0.457
+	process#1 goes to CPU#0 after waiting 0 seconds
+	CPU departure event set at T=6.344
+
+T:0.977
+	process#3 goes to CPU#1 after waiting 0 seconds
+	CPU departure event set at T=3.214
+
+T:1.629
+	process#5 goes to first level queue
+
+T:2.632
+	process#2 goes to first level queue
+
+T:2.664
+	process#6 goes to first level queue
+
+T:2.814
+	process#0 goes to first level queue
+
+T:3.214
+	process#3 is done at CPU#1
+
+T:3.214
+	process#3 goes to IO_Unit#0 after waiting 0 seconds in the queue and 0 in total
+	IO Unit departure event set at T=11.214
+
+T:3.214
+	process#0 goes to CPU#1 after waiting 0.4 seconds
+	CPU departure event set at T=4.824
+
+T:4.751
+	process#9 goes to first level queue
+
+T:4.824
+	process#0 is done at CPU#1
+
+T:4.824
+	process#0 goes to IO_Unit#1 after waiting 0 seconds in the queue and 0.4 in total
+	IO Unit departure event set at T=15.479
+
+T:4.824
+	process#2 goes to CPU#1 after waiting 2.192 seconds
+	CPU departure event set at T=6.9785
+
+T:4.868
+	process#8 goes to first level queue
+
+T:4.896
+	process#4 goes to first level queue
+
+T:4.97
+	process#7 goes to first level queue
+
+T:6.344
+	process#1 is done at CPU#0
+
+T:6.344
+	process#1 goes to second level queue
+
+T:6.344
+	process#5 goes to CPU#0 after waiting 4.715 seconds
+	CPU departure event set at T=10.666
+
+T:6.9785
+	process#2 is done at CPU#1
+
+T:6.9785
+	process#2 goes to second level queue
+
+T:6.9785
+	process#4 goes to CPU#1 after waiting 2.0825 seconds
+	CPU departure event set at T=9.143
+
+T:9.143
+	process#4 is done at CPU#1
+
+T:9.143
+	process#4 goes to second level queue
+
+T:9.143
+	process#9 goes to CPU#1 after waiting 4.392 seconds
+	CPU departure event set at T=11.719
+
+T:10.666
+	process#5 is done at CPU#0
+
+T:10.666
+	process#5 goes to second level queue
+
+T:10.666
+	process#7 goes to CPU#0 after waiting 5.696 seconds
+	CPU departure event set at T=17.008
+
+T:11.214
+	process#3 is done at IO_Unit#0
+
+T:11.214
+	process#1 goes to IO_Unit#0 after waiting 4.87 seconds in the queue and 4.87 in total
+	IO Unit departure event set at T=19.214
+
+T:11.214
+	process#3 goes to second level queue
+
+T:11.719
+	process#9 is done at CPU#1
+
+T:11.719
+	process#9 goes to second level queue
+
+T:11.719
+	process#8 goes to CPU#1 after waiting 6.851 seconds
+	CPU departure event set at T=14.913
+
+T:14.913
+	process#8 is done at CPU#1
+
+T:14.913
+	process#8 goes to second level queue
+
+T:14.913
+	process#6 goes to CPU#1 after waiting 12.249 seconds
+	CPU departure event set at T=18.1575
+
+T:15.479
+	process#0 is done at IO_Unit#1
+
+T:15.479
+	process#2 goes to IO_Unit#1 after waiting 8.5005 seconds in the queue and 10.6925 in total
+	IO Unit departure event set at T=21.923
+
+T:17.008
+	process#7 is done at CPU#0
+
+T:17.008
+	process#7 goes to second level queue
+
+T:18.1575
+	process#6 is done at CPU#1
+
+T:18.1575
+	process#6 goes to second level queue
+
+T:19.214
+	process#1 is done at IO_Unit#0
+
+T:19.214
+	process#4 goes to IO_Unit#0 after waiting 10.071 seconds in the queue and 12.1535 in total
+	IO Unit departure event set at T=27.214
+
+T:19.214
+	process#1 goes to second level queue
+
+T:21.923
+	process#2 is done at IO_Unit#1
+
+T:21.923
+	process#5 goes to IO_Unit#1 after waiting 11.257 seconds in the queue and 15.972 in total
+	IO Unit departure event set at T=32.782
+
+T:27.214
+	process#4 is done at IO_Unit#0
+
+T:27.214
+	process#3 goes to IO_Unit#0 after waiting 16 seconds in the queue and 16 in total
+	IO Unit departure event set at T=28.413
+
+T:27.214
+	process#4 goes to second level queue
+
+T:28.413
+	process#3 is done at IO_Unit#0
+
+T:28.413
+	process#9 goes to IO_Unit#0 after waiting 16.694 seconds in the queue and 21.086 in total
+	IO Unit departure event set at T=36.413
+
+T:32.782
+	process#5 is done at IO_Unit#1
+
+T:32.782
+	process#8 goes to IO_Unit#1 after waiting 17.869 seconds in the queue and 24.72 in total
+	IO Unit departure event set at T=42.18
+
+T:36.413
+	process#9 is done at IO_Unit#0
+
+T:36.413
+	process#7 goes to IO_Unit#0 after waiting 19.405 seconds in the queue and 25.101 in total
+	IO Unit departure event set at T=44.413
+
+T:36.413
+	process#9 goes to second level queue
+
+T:42.18
+	process#8 is done at IO_Unit#1
+
+T:42.18
+	process#6 goes to IO_Unit#1 after waiting 24.0225 seconds in the queue and 36.2715 in total
+	IO Unit departure event set at T=51.298
+
+T:44.413
+	process#7 is done at IO_Unit#0
+
+T:44.413
+	process#1 goes to IO_Unit#0 after waiting 25.199 seconds in the queue and 30.069 in total
+	IO Unit departure event set at T=49.718
+
+T:44.413
+	process#7 goes to second level queue
+
+T:49.718
+	process#1 is done at IO_Unit#0
+
+T:49.718
+	process#4 goes to IO_Unit#0 after waiting 22.504 seconds in the queue and 34.6575 in total
+	IO Unit departure event set at T=51.773
+
+T:51.298
+	process#6 is done at IO_Unit#1
+
+T:51.298
+	process#9 goes to IO_Unit#1 after waiting 14.885 seconds in the queue and 35.971 in total
+	IO Unit departure event set at T=52.491
+
+T:51.773
+	process#4 is done at IO_Unit#0
+
+T:51.773
+	process#7 goes to IO_Unit#0 after waiting 7.36 seconds in the queue and 32.461 in total
+	IO Unit departure event set at T=54.48
+
+T:52.491
+	process#9 is done at IO_Unit#1
+
+T:54.48
+	process#7 is done at IO_Unit#0

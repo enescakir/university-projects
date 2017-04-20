@@ -1,0 +1,11 @@
+.idea/
+project5
+*.log
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+testcases/
+result*
+test_case*
+testc*

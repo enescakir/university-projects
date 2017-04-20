@@ -1,0 +1,13 @@
+.idea/
+project4
+generator
+*.log
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+*.in
+*.out
+result*
+test_case*
+testcase*
