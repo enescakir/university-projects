@@ -1,0 +1,11 @@
+    Name 			 	Score	 	Round
+  1 Murat 			 	18090	 	12
+  2 Murat 			 	1436	 	3
+  3 Deneme 			 	528	 	2
+  4 Enes 			 	483	 	2
+  5 ENES 			 	412	 	1
+  6 NURBANU 			 	123	 	1
+  7 KEREM 			 	77	 	1
+  8 NUR 			 	73	 	1
+  9 Murat 			 	73	 	1
+ 10 NURBANU 			 	31	 	1

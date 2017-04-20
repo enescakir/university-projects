@@ -1,0 +1,10 @@
+W1 Istanbul
+W2 Istanbul
+W3 Ankara
+W4 Istanbul
+W5 Ankara
+W6 Diyarbakir
+W7 Diyarbakir
+W8 Ankara
+W9 Istanbul
+W10 Ankara

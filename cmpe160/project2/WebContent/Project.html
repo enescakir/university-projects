@@ -1,0 +1,238 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"  
+  "http://www.w3.org/TR/html4/loose.dtd">  
+<html > 
+<head><title>CMPE 160: INTRODUCTION TO OBJECT ORIENTED PROGRAMMING
+Project 2</title> 
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"> 
+<meta name="generator" content="TeX4ht (http://www.cse.ohio-state.edu/~gurari/TeX4ht/)"> 
+<meta name="originator" content="TeX4ht (http://www.cse.ohio-state.edu/~gurari/TeX4ht/)"> 
+<!-- html --> 
+<meta name="src" content="Project2.tex"> 
+<meta name="date" content="2016-05-01 22:46:00"> 
+<link rel="stylesheet" type="text/css" href="Project2.css"> 
+</head><body 
+>
+   <div class="maketitle">
+                                                                                          
+                                                                                          
+                                                                                          
+                                                                                          
+
+<h2 class="titleHead">CMPE 160: INTRODUCTION TO OBJECT
+ORIENTED PROGRAMMING<br />
+Project 2</h2>
+<div class="author" ></div><br />
+<div class="date" ><span 
+class="ptmb7t-x-x-144">Deadline</span><span 
+class="ptmr7t-x-x-144">: 15.05.2016, 23.59 AM.</span></div>
+   </div>
+<!--l. 22--><p class="indent" >   In this project, you are expected to design and develop a program that can be used to simulate
+transportations done using freight trains.
+   <h3 class="sectionHead"><span class="titlemark">1    </span> <a 
+ id="x1-10001"></a>Description</h3>
+<!--l. 26--><p class="noindent" >You are going to simulate a transportation scenario. According to this scenario, you are given
+several cities. In each city, there exists a train station which consists of two garages; one for
+locomotives and the other for waggons. Your task consists of several missions. Each mission
+requires you to assemble a simulated train at the specified city and by following the given route,
+arrive at the destination city, leaving and taking waggons from the cities you visit. You are
+expected to create a program that reads the input about the trains from the input files and after
+completing the missions, produces an output file exhibiting the final state of the stations at each
+city.
+<!--l. 28--><p class="noindent" >
+   <h4 class="subsectionHead"><span class="titlemark">1.1    </span> <a 
+ id="x1-20001.1"></a>Cities</h4>
+      <ul class="itemize1">
+      <li class="itemize">The data about the cities can be found in <span 
+class="ptmri7t-x-x-120">data/dests.txt</span>.
+      </li>
+      <li class="itemize">In this file, you are given several cities as possible destination points for your simulations.</li></ul>
+                                                                                          
+                                                                                          
+<!--l. 34--><p class="noindent" >
+   <h4 class="subsectionHead"><span class="titlemark">1.2    </span> <a 
+ id="x1-30001.2"></a>Stations</h4>
+      <ul class="itemize1">
+      <li class="itemize">In each city you are given, there exists a train station.
+      </li>
+      <li class="itemize">In a station, there are two garages: a waggon garage and a locomotive garage.
+      </li>
+      <li class="itemize">A waggon garage keeps the waggons in the station.
+      </li>
+      <li class="itemize">In our scenario, waggon garages are modeled as stacks that are following the last-in-first-out
+      policy.
+      </li>
+      <li class="itemize">The initial configuration of waggon garages in each city is given in <span 
+class="ptmri7t-x-x-120">data/waggons.txt</span>.
+      </li>
+      <li class="itemize">A locomotive garage keeps the locomotives in the station.
+      </li>
+      <li class="itemize">In  our  scenario,  locomotive  garages  are  modeled  as  priority  queues.  When  asked  for  a
+      locomotive, they should retrieve the most powerful locomotive inside the garage.
+      </li>
+      <li class="itemize">The initial configuration of locomotive garages in each city is given in <span 
+class="ptmri7t-x-x-120">data/locs.txt</span>.
+      </li>
+      <li class="itemize">A  train  is  modeled  as  a  doubly  linked  list.  Keep  in  mind  that  <span 
+class="ptmri7t-x-x-120">Locomotive  </span>class  extends
+      <span 
+class="ptmri7t-x-x-120">Waggon </span>class. Therefore, you will have doubly linked lists of waggons as your trains.</li></ul>
+<!--l. 47--><p class="noindent" >
+   <h4 class="subsectionHead"><span class="titlemark">1.3    </span> <a 
+ id="x1-40001.3"></a>Missions</h4>
+      <ul class="itemize1">
+      <li class="itemize">The missions are given in <span 
+class="ptmri7t-x-x-120">data/missions.txt</span>.
+      </li>
+      <li class="itemize">A misson has the following format: A-B-C-x-y-<span 
+class="cmmi-12">z</span><sub><span 
+class="cmr-8">1</span></sub><span 
+class="cmmi-12">,z</span><sub><span 
+class="cmr-8">2</span></sub><span 
+class="cmmi-12">...</span>
+           <ul class="itemize2">
+           <li class="itemize">A: Starting station.
+                                                                                          
+                                                                                          
+           </li>
+           <li class="itemize">B: Midway station.
+           </li>
+           <li class="itemize">C: Target station.
+           </li>
+           <li class="itemize">x: Number of waggons you take from the starting station.
+           </li>
+           <li class="itemize">y: Number of waggons you take from the midway station.
+           </li>
+           <li class="itemize">z: Indices of the waggons you must leave at the midway station.</li></ul>
+      </li>
+      <li class="itemize">A complete mission requires you to complete the following procedure:
+           <ol  class="enumerate1" >
+           <li 
+  class="enumerate" id="x1-4002x1">Assemble a train at the starting city, <span 
+class="ptmb7t-x-x-120">A</span>. Since a train is modeled as a doubly linked
+           list of waggons, you need to start with the most powerful locomotive you have in the
+           locomotive garage and insert it into the head of your list. Afterwards, you need to insert
+           <span 
+class="ptmb7t-x-x-120">x </span>waggons the waggon garage at city A to this list.
+           </li>
+           <li 
+  class="enumerate" id="x1-4004x2">Append <span 
+class="ptmb7t-x-x-120">y </span>waggons from the midway station, <span 
+class="ptmb7t-x-x-120">B</span>, to your list.
+           </li>
+           <li 
+  class="enumerate" id="x1-4006x3">Leave waggons <span 
+class="cmbx-12">z</span><sub><span 
+class="cmbx-8">1</span></sub><span 
+class="cmmi-12">,</span><span 
+class="cmbx-12">z</span><sub><span 
+class="cmbx-8">2</span></sub><span 
+class="cmmi-12">...</span> at midway station.
+           </li>
+           <li 
+  class="enumerate" id="x1-4008x4">Continue to your journey and disband the train at target station, <span 
+class="ptmb7t-x-x-120">C</span>. When disbanding the
+           train, put the locomotive into the locomotive garage and waggons into waggon garage
+           at C.</li></ol>
+      </li>
+      <li class="itemize">During a mission you need to pay attention to the order of insertions and removals.
+      </li>
+      <li class="itemize">An example run is given in Section <a 
+href="#x1-70004">4<!--tex4ht:ref: sect:exm --></a>.</li></ul>
+<!--l. 75--><p class="noindent" >
+   <h3 class="sectionHead"><span class="titlemark">2    </span> <a 
+ id="x1-50002"></a>Details</h3>
+<!--l. 76--><p class="noindent" >In the source code that is provided to you, there are three packages: <span 
+class="ptmb7t-x-x-120">intfs, adts </span>and <span 
+class="ptmb7t-x-x-120">runnable</span>.
+      <ul class="itemize1">
+      <li class="itemize"><span 
+class="ptmri7t-x-x-120">runnable  </span>contains  your  main  class,  as  usual  and  is  responsible  for  the  operation  of  the
+      program.
+                                                                                          
+                                                                                          
+      </li>
+      <li class="itemize"><span 
+class="ptmri7t-x-x-120">intfs     </span>package     contains     three     interfaces;     <span 
+class="ptmb7t-x-x-120">StackIntf,     PriorityQueueIntf     </span>and
+      <span 
+class="ptmb7t-x-x-120">DoublyLinkedListIntf</span>. You are expected to design and implement the Abstract Data Types
+      (ADTs) using these interfaces.
+      </li>
+      <li class="itemize">You are expected to develop generic classes as your ADTs. In the <span 
+class="ptmri7t-x-x-120">adts </span>package, there are 3
+      incomplete classes that will be the ADTs you are expected to use in the project. The most of
+      the structure for creating generic ADTs is given in the code you are provided with.
+      </li>
+      <li class="itemize">During  implementation,  please  pay  attention  to  the  markers  we  placed.  Write  your  code
+      between <span 
+class="ptmb7t-x-x-120">// CHANGES START BELOW THIS LINE </span>and <span 
+class="ptmb7t-x-x-120">// CHANGES END ABOVE</span>
+      <span 
+class="ptmb7t-x-x-120">THIS LINE </span>lines.
+      </li>
+      <li class="itemize"><span class="underline">IMPORTANT:</span> Try to put as small code as possible inside the main method. Create other
+      methods or classes, preferably, and call them in you main method. Main method should be
+      quite comprehensible.</li></ul>
+<!--l. 86--><p class="noindent" >
+   <h3 class="sectionHead"><span class="titlemark">3    </span> <a 
+ id="x1-60003"></a>Output File</h3>
+<!--l. 87--><p class="noindent" >Your program should generate an output file exhibiting the final status of the stations. The output format
+we picked has to be followed strictly. The format is as follows: <br 
+class="newline" />
+<!--l. 89--><p class="indent" >   <img 
+src="images/out.png" alt="PIC"  
+>
+                                                                                          
+                                                                                          
+<!--l. 92--><p class="noindent" >
+   <h3 class="sectionHead"><span class="titlemark">4    </span> <a 
+ id="x1-70004"></a>Example Run</h3>
+      <ul class="itemize1">
+      <li class="itemize">Assume that you are given the following files:</li></ul>
+<!--l. 98--><p class="noindent" ><img 
+src="images/init.png" alt="PIC"  
+>
+      <ul class="itemize1">
+      <li class="itemize">Reading the input from these files, the initial configuration of the stations as follows:</li></ul>
+<!--l. 103--><p class="noindent" ><img 
+src="images/initc.png" alt="PIC"  
+>
+      <ul class="itemize1">
+      <li class="itemize">After reading the mission, assemble the following train, leaving the station in Istanbul as
+      below:</li></ul>
+<!--l. 109--><p class="noindent" ><img 
+src="images/inittr.png" alt="PIC"  
+><br 
+class="newline" /><img 
+src="images/c1.png" alt="PIC"  
+>
+      <ul class="itemize1">
+      <li class="itemize">The train takes 2 waggons from Ankara and leaves the first and second waggon after the
+      locomotive at Ankara (Locomotive is not counted, waggon indices start from 0). Pay attention
+      to the order.</li></ul>
+<!--l. 115--><p class="noindent" ><img 
+src="images/tr1.png" alt="PIC"  
+><br 
+class="newline" /><img 
+src="images/c2.png" alt="PIC"  
+>
+      <ul class="itemize1">
+      <li class="itemize">After the train reaches to Diyarbakir, it is disbanded at this city. Waggons and the locomotive
+      are inserted to the corresponding garages. Again, pay attention to the order.</li></ul>
+<!--l. 121--><p class="noindent" ><img 
+src="images/c3.png" alt="PIC"  
+>
+                                                                                          
+                                                                                          
+      <ul class="itemize1">
+      <li class="itemize">The output is given in <span 
+class="ptmri7t-x-x-120">data/result.txt </span>file, as follows:
+      <!--l. 127--><p class="noindent" ><img 
+src="images/exout.png" alt="PIC"  
+></li></ul>
+    
+</body></html> 
+
+                                                                                          
+
+

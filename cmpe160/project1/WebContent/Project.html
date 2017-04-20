@@ -1,0 +1,172 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"  
+  "http://www.w3.org/TR/html4/loose.dtd">  
+<html > 
+<head><title>CMPE 160: INTRODUCTION TO OBJECT ORIENTED PROGRAMMING
+Project 1</title> 
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"> 
+<meta name="generator" content="TeX4ht (http://www.cse.ohio-state.edu/~gurari/TeX4ht/)"> 
+<meta name="originator" content="TeX4ht (http://www.cse.ohio-state.edu/~gurari/TeX4ht/)"> 
+<!-- html --> 
+<meta name="src" content="Project1.tex"> 
+<meta name="date" content="2016-04-05 08:25:00"> 
+<link rel="stylesheet" type="text/css" href="Project1.css"> 
+</head><body 
+>
+   <div class="maketitle">
+                                                                                          
+                                                                                          
+                                                                                          
+                                                                                          
+
+<h2 class="titleHead">CMPE 160: INTRODUCTION TO OBJECT
+ORIENTED PROGRAMMING<br />
+Project 1</h2>
+<div class="author" ></div><br />
+<div class="date" ><span 
+class="ptmb7t-x-x-144">Deadline</span><span 
+class="ptmr7t-x-x-144">: 20/04/2015, 23:59.</span></div>
+   </div>
+<!--l. 22--><p class="indent" >   In this project, you are expected to develop the game detailed below.
+   <h3 class="sectionHead"><span class="titlemark">1    </span> <a 
+ id="x1-10001"></a>Description</h3>
+<!--l. 26--><p class="noindent" >You are expected to implement a game called &#8221;Sprinter Turtle&#8221;. In the Sprinter Turtle game, the user
+controls a turtle by using arrow keys on the keyboard. The aim of the user is to get the turtle
+across the street over and over again, during that time, keep the turtle from getting hit by a
+car.
+      <ul class="itemize1">
+      <li class="itemize">The game starts with the turtle sitting in the safe zone.
+      </li>
+      <li class="itemize">The vehicles are not controllable by the user. They travel within their own lanes. Furthermore,
+      their creation, types, lanes and directions are decided randomly.
+      </li>
+      <li class="itemize">The user controls the turtle using arrow keys. The turtle can move forward, backward, to its
+      right and left.
+      </li>
+      <li class="itemize">In every round that turtle completes, vehicles get faster. This means that starting from the safe
+      zone, when turtle reaches across the street and comes back to the safe zone, vehicle instances
+      will be moved with an increased margin.
+                                                                                          
+                                                                                          
+      </li>
+      <li class="itemize">Whenever the turtle gets hit by a vehicle, the game finishes and the final score is calculated.
+      The score is calculated based on the number of rounds that the user completes. Faster rounds
+      must be more rewarding in terms of score.
+      </li>
+      <li class="itemize">The  leaderboard  will  keep  the  10  highest  scores.  This  requires  you  to  get  the  user  name
+      before the game starts and keep the names and corresponding highest scores in a file that gets
+      updated whenever a new high score is achieved.</li></ul>
+<div class="center" 
+>
+<!--l. 37--><p class="noindent" >
+<!--l. 38--><p class="noindent" ><img 
+src="img/00.jpg" alt="PIC"  
+></div>
+<!--l. 41--><p class="noindent" >
+   <h3 class="sectionHead"><span class="titlemark">2    </span> <a 
+ id="x1-20002"></a>Details</h3>
+<!--l. 42--><p class="noindent" >In the source code that is provided to you, there are two packages: visualization and runnable.
+      <ul class="itemize1">
+      <li class="itemize">The package visualization contains one abstract class <span 
+class="ptmb7t-x-x-120">Vehicle </span>and an interface <span 
+class="ptmb7t-x-x-120">BoardIntf</span>. You are
+      expected to design and implement:
+           <ol  class="enumerate1" >
+           <li 
+  class="enumerate" id="x1-2002x1">The <span 
+class="ptmb7t-x-x-120">Board </span>class, that implements the provided interface and serves as the board for the
+           game, just as we did in PS5.
+           </li>
+           <li 
+  class="enumerate" id="x1-2004x2"><span 
+class="ptmb7t-x-x-120">Car </span>and <span 
+class="ptmb7t-x-x-120">Bus </span>classes, that must extend the provided abstract class. The instances of
+           these classes will differ in size, color, and number of wheels they have.</li></ol>
+      </li>
+      <li class="itemize">The package runnable contains <span 
+class="ptmri7t-x-x-120">Main.java </span>and as usual, Main class contains the controller
+      methods.
+           <ul class="itemize2">
+           <li class="itemize">You are provided with the main loop of the game. Every iteration of this loop should
+           be considered as a frame in your game. Therefore, in each frame you need to control
+           vehicles, check for collisions, etc. In addition, if the game should proceed, then you
+           need to update the objects, accordingly. Your main loop may look like as follows:
+                                                                                          
+                                                                                          
+           <div class="algorithmic">
+                 <span class="label-6.0pt">
+             </span>&#xA0;<span 
+class="algorithmic"><span 
+class="ptmb7t-x-x-120">while</span>&#x00A0;true&#x00A0;<span 
+class="ptmb7t-x-x-120">do</span>                  </span><br class="algorithmic"/><span class="label-6.0pt">              </span>&#xA0;<span  class="algorithmic">      collision <span 
+class="cmsy-10x-x-120">&#x2190; </span>checkForCollision()                  </span><br class="algorithmic"/><span class="label-6.0pt">              </span>&#xA0;<span  class="algorithmic">      <span 
+class="ptmb7t-x-x-120">if</span>&#x00A0;collision&#x00A0;<span 
+class="ptmb7t-x-x-120">then</span>                  </span><br class="algorithmic"/><span class="label-6.0pt">              </span>&#xA0;<span  class="algorithmic">            gameOver()                  </span><br class="algorithmic"/><span class="label-6.0pt">              </span>&#xA0;<span  class="algorithmic">      <span 
+class="ptmb7t-x-x-120">else</span>                  </span><br class="algorithmic"/><span class="label-6.0pt">              </span>&#xA0;<span  class="algorithmic">            v <span 
+class="cmsy-10x-x-120">&#x2190; </span>createVehicle()                  </span><br class="algorithmic"/><span class="label-6.0pt">              </span>&#xA0;<span  class="algorithmic">            allVehicles <span 
+class="cmsy-10x-x-120">&#x2190; </span>allVehicles.add(v)                  </span><br class="algorithmic"/><span class="label-6.0pt">              </span>&#xA0;<span  class="algorithmic">            moveVehicles()                  </span><br class="algorithmic"/><span class="label-6.0pt">              </span>&#xA0;<span  class="algorithmic">            removeVehicles() //Remove the ones that left screen                  </span><br class="algorithmic"/><span class="label-6.0pt">              </span>&#xA0;<span  class="algorithmic">            updateScore()                  </span><br class="algorithmic"/><span class="label-6.0pt">              </span>&#xA0;<span  class="algorithmic">      <span 
+class="ptmb7t-x-x-120">end</span>&#x00A0;<span 
+class="ptmb7t-x-x-120">if</span>                  </span><br class="algorithmic"/><span class="label-6.0pt">              </span>&#xA0;<span  class="algorithmic"><span 
+class="ptmb7t-x-x-120">end</span>&#x00A0;<span 
+class="ptmb7t-x-x-120">while</span>                  </span><br class="algorithmic"/><span class="label-6.0pt">              </span>&#xA0;<span  class="algorithmic"></span>
+           <!--l. 69--><p class="noindent" ></div>
+           </li>
+           <li class="itemize">As mentioned above, the creation, type, lane and direction of the vehicle must be decided
+           randomly. The following code snippet, for example, creates a car object with 1%
+           probability.<br 
+class="newline" />
+           <!--l. 73--><p class="noindent" ><img 
+src="img/22.png" alt="PIC"  
+><br 
+class="newline" />
+           </li>
+           <li class="itemize"><span class="underline">IMPORTANT:</span> Try to put as small code as possible inside the main method. Create other
+           methods or classes, preferably, and call them in you main method. Main method should be
+           quite comprehensible.</li></ul>
+      </li></ul>
+                                                                                          
+                                                                                          
+<!--l. 80--><p class="noindent" >
+   <h3 class="sectionHead"><span class="titlemark">3    </span> <a 
+ id="x1-30003"></a>Bonus</h3>
+<!--l. 81--><p class="noindent" >Fully implemented, thoroughly tested and nicely documented additional features will receive bonus points.
+These features include:
+      <ul class="itemize1">
+      <li class="itemize"><span class="underline">Implementing the &#8221;Fire!&#8221; feature:</span> This feature enables the turtle to fire its gun to eliminate
+      a car using &#8221;WASD&#8221; keys. The turtle may use its fire ability only 3 times during a game.
+      For example, when the user hits D key on the keyboard, the car to the right of the turtle gets
+      demolished, and a new car gets created from the starting position of the lane. An example
+      screen shot is given in the following figure.</li></ul>
+<div class="center" 
+>
+<!--l. 86--><p class="noindent" >
+<!--l. 87--><p class="noindent" ><img 
+src="img/11.jpg" alt="PIC"  
+><br />
+</div>
+      <ul class="itemize1">
+      <li class="itemize"><span class="underline">Implementing the &#8221;Meteor Hit&#8221; functionality:</span> From time to time, a meteorite falls onto the
+      road. The location that the meteorite will hit should be decided randomly. In order to enhance
+      the gameplay, the users must be alerted 5 seconds before the meteorite hits. Therefore, you
+      are expected to paint a bright yellow dot on the screen where the meteorite will hit within
+      the following 5 seconds. Every object, vehicles and turtle, within a radius of 10 units will
+      disappear; so that, if the turtle gets hit, then the game finishes and if the vehicles get hit, they
+      just explode and the game continues.</li></ul>
+<!--l. 94--><p class="noindent" >
+   <h3 class="sectionHead"><span class="titlemark">4    </span> <a 
+ id="x1-40004"></a>Notes</h3>
+      <ul class="itemize1">
+      <li class="itemize">You   are   going   to   use   ACM&#8217;s   JTF   Graphics   library.   A   nice   way   to   study   the
+      functionalities   that   this   library   provides   might   be   to   follow   the   tutorials   here
+      http://cs.stanford.edu/people/eroberts/jtf/.
+      </li>
+      <li class="itemize">An initial implementation of the project is given at the end of the fifth PS. Use that code as
+      your guide when building on top of the code we provide here.
+      </li>
+      <li class="itemize">Pay  attention  to  your  indentation  and  and  documentation  of  the  source  code.  Write
+      corresponding test methods.</li></ul>
+    
+</body></html> 
+
+                                                                                          
+
+

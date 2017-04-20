@@ -1,0 +1,114 @@
+<html>
+<head>
+<style>
+.eclipse {
+	width: 20px height: 20px
+}
+
+.tab {
+	margin-left: 30px
+}
+
+.col-lg-12 div {
+	margin-bottom: 640px;
+	align: center
+}
+</style>
+<title>CMPE160</title>
+</head>
+<body>
+	<div class="container">
+		<div class="row">
+			<div class="col-lg-12">
+				<h1>Spring 2016, CMPE 160, Project 3 </h1>
+				<h3>Cagatay Yildiz, Yigit Yildirim, Tuna Tugcu </h3>
+				<h3>Deadline: May 31, 11.59 pm </h3>
+				<div id="page1">
+					<p>In this project, you are going to implement an AVL Tree. Below are the files provided:</p>
+					<p><b>AVLTreeInterface.java:</b> This interface contains signatures of all methods that you are expected to 
+						implement. See the javadoc for more detail. </p>
+					<p><b>AVLTree.java:</b> This is the main file of the project, where you represent an AVLTree. It implements 
+						AVLTreeInterface.java and contains an inner class, which is already implemented. Initially, this class 
+						produces errors just because it does not implement methods that it promises to. </p>
+
+					<p>
+						<b>Details of Submission:</b>
+						<ul>
+							<li>
+								The way your project is going to be graded is as follows: We will take AVLTree.java that you 
+								implemented, put it into a separate project and run test cases on this project. So, all the code 
+								implemented in different .java files will be basically lost. Recall this while implementing. Note that 
+								this is not to say you are allowed to break OOP hierarchy, use meaningless methods, fields, inner classes, etc. 
+							</li>
+								An example tree and outputs of some of the methods are given at the end of the description. Please see the  code first and 
+								try to grasp outputs. 
+							<li>
+								Do not use any Turkish character in variable/field/method/class/package naming. This is a very 
+								bad practice. One of the most common naming conventions for Java programming states 
+
+								<ul>
+									<li>
+										Names of variables start with lowercase letters, and use uppercase letters at the start of 
+										each word in the name ("camelstyle"): e.g., dartsInCircle. 
+									</li>
+									<li>
+										Names of classes start with uppercase letters,and use use other uppercase letters at the
+										start of each word in the name: e.g., StringTokenizer
+									</li>
+									<li>
+										Names of public static final fields are written in all uppercase, and use underscores to 
+										separate each word in the name: e.g., SPEED_OF_LIGHT. 
+									</li>
+									<li>
+										See https://www.cs.cmu.edu/~pattis/15-1XX/15-200/lectures/style/lecture.html  
+										for more details regarding proper style of coding.
+									</li>
+									<li>
+										Make sure that your insert and delete methods work properly. I will use those while building 
+										your tree. So, for example, if they do not work well but isEmpty() method is okay, you are 
+										very likely not to receive any points from test cases for isEmpty() .
+									</li>
+								</ul>
+							</li>
+							<li>
+								Address your questions directly to the mail list. Also, read the javadoc and mail list carefully. We 
+								will not reply a question that has already been answered! 
+							</li>
+						</ul>
+					</p>
+					<p>
+						<h3>Good Luck!</h3>
+					</p>
+
+					<p>
+						<h3>Example:</h3>
+						Image from: http://anoopsmohan.blogspot.com.tr/2011/11/avltreeimplementationinc.html .
+						</br>
+						All of the methods below are executed on this tree: 
+						<img src="images/tree.png">
+
+						<ul>
+							<li>
+								tree.bfTraverse() ---> an ArrayList containing [4,2,6,1,3,5,7]
+							</li>
+							<li>
+								tree.areCousins(2,6) ---> false 
+							</li>
+							<li>
+								tree.areCousins(1,5) ---> true
+							</li>
+							<li>
+								tree.numElementsInRange(2,8) ---> 5 
+							</li>
+							<li>
+								tree.balanceFactor(4) ---> 0
+							</li>
+						</ul>
+ 					</p>
+
+ 				</div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>
