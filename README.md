@@ -6,6 +6,7 @@ Programming projects that I have written at university
 ### [CmpE160 - Introduction to Object Oriented Programming](/cmpe160)
 
 ### [CmpE230 - Systems Programming](/cmpe230)
+- [Project 1](/cmpe230/project1) `C++`
 
 ### [CmpE240 - Digital Systems](/cmpe240)
 

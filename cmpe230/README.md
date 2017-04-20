@@ -3,5 +3,5 @@
 | --- | --- |
 | Spring 2017  | Can Özturan  |
 
-### [Project 1](/cmpe230/project1)
-### [Project 2](/cmpe230/project2)
+### [Project 1](/cmpe230/project1) `C++`
+### [Project 2](/cmpe230/project2) `Python`
