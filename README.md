@@ -13,6 +13,7 @@ Programming projects that I have written at university
 
 ### [CmpE230 - Systems Programming](/cmpe230)
 - [Project 1](/cmpe230/project1) `C++`
+- [Project 2](/cmpe230/project2) `Python 3`
 
 ### [CmpE240 - Digital Systems](/cmpe240)
 
