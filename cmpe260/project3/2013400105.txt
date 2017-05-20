@@ -1,0 +1,1 @@
+My game starts with `GameArena start.`
