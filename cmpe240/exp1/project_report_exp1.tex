@@ -1,0 +1,105 @@
+\documentclass[12pt,a4paper]{report}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{fullpage}
+\usepackage{graphicx}
+
+\title{CMPE 240 Experiment 1 Preliminary Work}
+\begin{document}
+
+\section*{CMPE 240 Experiment 1 Preliminary Work}
+
+\noindent
+\textbf{Student Names:} Ergün ERDOĞMUŞ, Mustafa Enes ÇAKIR \\
+\textbf{Student IDs:} 2014400006, 2013400105 \\
+\textbf{Group ID:} 2
+
+\subsection*{Truth Table}
+
+\begin{center}
+	\begin{tabular}{|c|ccc|c|}
+		\hline
+		\textbf{\#} & \textbf{$x_2$} & \textbf{$x_1$} &\textbf{$x_0$} & \textbf{$y$} \\
+		\hline
+		\textbf{0} & 0 & 0 & 0 & 0 \\
+		\hline
+		\textbf{1} & 0 & 0 & 1 & 1 \\
+		\hline
+		\textbf{2} & 0 & 1 & 0 & 1 \\
+		\hline
+		\textbf{3} & 0 & 1 & 1 & 1 \\
+		\hline
+		\textbf{4} & 1 & 0 & 0 & 0 \\
+		\hline
+		\textbf{5} & 1 & 0 & 1 & 1 \\
+		\hline
+		\textbf{6} & 1 & 1 & 0 & 0 \\
+		\hline
+		\textbf{7} & 1 & 1 & 1 & 1 \\
+		\hline
+	\end{tabular}
+\end{center}
+
+\subsection*{Sum of Products (SOP)}
+
+\begin{align*}
+	y & = (x_2' x_1' x_0) + (x_2' x_1 x_0') + (x_2' x_1 x_0) + (x_2 x_1' x_0) + (x_2 x_1 x_0)\\
+\end{align*}
+
+\subsection*{Minimized SOP}
+
+\begin{align*}
+	y & = x_2'(x_1' x_0 + x_1 x_0' + x_1 x_0) + x_2 x_0 (x_1' + x_1) &[Distributive]\\
+	& = x_2'(x_1' x_0 + x_1 x_0' + x_1 x_0) + x_2 x_0 (1) &[Complement]\\
+	& = x_2'(x_1' x_0 + x_1 x_0' + x_1 x_0) + x_2 x_0 &[Identity]\\
+	& = x_2'(x_0(x_1' + x_1)+ x_1 x_0') + x_2 x_0 &[Distributive]\\
+	& = x_2'(x_0(1)+ x_1 x_0') + x_2 x_0 &[Complement]\\
+	& = x_2'(x_0 + x_1 x_0') + x_2 x_0 &[Identity]\\
+	& = x_2'((x_0 + x_1) (x_0 + x_0')) + x_2 x_0 &[Distributive]\\
+	& = x_2'((x_0 + x_1) (1)) + x_2 x_0 &[Complement]\\
+	& = x_2'(x_0 + x_1) + x_2 x_0 &[Identity]\\
+	& = x_2'x_0 + x_2'x_1 + x_2x_0 &[Distributive]\\
+	& = x_0(x_2' + x_2) + x_2'x_1 &[Distributive]\\
+	& = x_0(1) + x_2'x_1 &[Complement]\\
+	& = x_0 + x_2'x_1 &[Identity]\\
+	&
+\end{align*}
+
+\newpage
+\noindent
+\textbf{Student Names:} Ergün ERDOĞMUŞ, Mustafa Enes ÇAKIR \\
+\textbf{Student IDs:} 2014400006, 2013400105 \\
+\textbf{Group ID:} 2
+
+\subsection*{Product of Sums (POS)}
+
+\begin{align*}
+	y & = (x_2 + x_1 + x_0).(x_2' + x_1 + x_0).(x_2' + x_1' + x_0)
+\end{align*}
+
+\subsection*{Minimized POS}
+
+\begin{align*}
+	y & = (x_2 + x_1 + x_0).(x_2' + x_1 + x_0).(x_2' + x_1' + x_0) \\
+	& = (x_2x_2' + x_1 + x_0)(x_2' + x_1' + x_0) &[Distributive] \\
+	& = (0 + x_1 + x_0)(x_2' + x_1' + x_0) &[Complement]\\
+	& = (x_1 + x_0)(x_2' + x_1' + x_0) &[Identity]\\
+	& = x_1x_2' + x_1x_1' + x_1x_0 + x_0x_2' + x_0x_1' + x_0x_0 &[Distributive]\\
+	& = x_1x_2' + 0 + x_1x_0 + x_0x_2' + x_0x_1' + x_0x_0 &[Complement]\\
+	& = x_1x_2' + x_1x_0 + x_0x_2' + x_0x_1' + x_0x_0 &[Identity]\\
+	& = x_1x_2' + x_1x_0 + x_0x_2' + x_0x_1' + x_0 &[Idempotent]\\
+	& = x_1x_2' + x_0x_2' + x_0(x_1 + x_1') + x_0 &[Distributive]\\
+	& = x_1x_2' + x_0x_2' + x_01 + x_0 &[Complement]\\
+	& = x_1x_2' + x_0x_2' + x_0 + x_0 &[Identity]\\
+	& = x_1x_2' + x_0x_2' + x_0 &[Idempotent]\\
+	& = x_2'(x_1 + x_0) + x_0 &[Distributive]\\
+	& = (x_2' + x_0)(x_0 + x_1 + x_0) &[Distributive]\\
+	& = (x_2' + x_0)(x_1 + x_0)&[Idempotent]
+\end{align*}
+
+\subsection*{Circuit}
+\includegraphics[width=\textwidth]{exp1.png}
+
+\end{document}

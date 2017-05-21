@@ -1,0 +1,116 @@
+\documentclass[12pt,a4paper]{report}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{fullpage}
+\usepackage{graphicx}
+
+\title{CMPE 240 Experiment 3 Preliminary Work}
+\begin{document}
+
+\noindent
+\textbf{Student Names:} Ergün ERDOĞMUŞ, Mustafa Enes ÇAKIR \\
+\textbf{Student IDs:} 2014400006, 2013400105 \\
+\textbf{Group ID:} 2 \\
+\textbf{Session:} 2
+
+\section*{CMPE 240 Experiment 3 Preliminary Work}
+
+\subsection*{Finite State Machine}
+    \begin{center}
+	    \includegraphics[width=\textwidth]{exp3-fsm.png}
+    \end{center}
+
+
+\subsection*{Architecture}
+    \begin{center}
+	    \includegraphics[width=250pt,keepaspectratio]{exp3-arc.png}
+    \end{center}
+
+\pagebreak
+\noindent
+\textbf{Student Names:} Ergün ERDOĞMUŞ, Mustafa Enes ÇAKIR \\
+\textbf{Student IDs:} 2014400006, 2013400105 \\
+\textbf{Group ID:} 2 \\
+\textbf{Session:} 2
+
+\subsection*{State Encodings}
+\begin{center}
+        \begin{tabular}{|c|c|}
+        \hline
+        \textbf{State Names} & \textbf{State Encodings} \\
+        \hline
+        \text{S(0)} & \text{000} \\
+        \hline
+        \text{S(1)} & \text{001} \\
+        \hline
+        \text{S(2)} & \text{010} \\
+        \hline
+        \text{S(3)} & \text{011} \\
+        \hline
+        \text{S(4)} & \text{100} \\
+        \hline
+        \text{S(5)} & \text{101} \\
+        \hline
+        \text{S(6)} & \text{110} \\
+        \hline
+        \text{S(7)} & \text{111} \\
+        \hline
+    \end{tabular}
+\end{center}
+
+\subsection*{State Transition Table}
+
+\begin{center}
+	\begin{tabular}{|c|c|c|c|}
+		\hline
+		\textbf{Current State}  & \textbf{External Input} & \textbf{Next State} & \textbf{External Output} \\
+		\hline
+			\text{000} & \text{0} & \text{000} & \text{00} \\
+		\hline
+			\text{000} & \text{1} & \text{001} & \text{00} \\
+		\hline
+			\text{001} & \text{0} & \text{010} & \text{00} \\
+		\hline
+			\text{001} & \text{1} & \text{001} & \text{00} \\
+		\hline
+			\text{010} & \text{0} & \text{011} & \text{00} \\
+		\hline
+			\text{010} & \text{1} & \text{111} & \text{00} \\
+		\hline
+			\text{011} & \text{0} & \text{100} & \text{00} \\
+		\hline
+			\text{011} & \text{1} & \text{110} & \text{00} \\
+		\hline
+			\text{100} & \text{0} & \text{100} & \text{00} \\
+		\hline
+			\text{100} & \text{1} & \text{101} & \text{00} \\
+		\hline
+			\text{101} & \text{0} & \text{010} & \text{01} \\
+		\hline
+			\text{101} & \text{1} & \text{001} & \text{01} \\
+		\hline
+			\text{110} & \text{0} & \text{010} & \text{10} \\
+		\hline
+			\text{110} & \text{1} & \text{001} & \text{10} \\
+		\hline
+			\text{111} & \text{0} & \text{010} & \text{11} \\
+		\hline
+			\text{111} & \text{1} & \text{001} & \text{11} \\
+		\hline
+
+
+	\end{tabular}
+\end{center}
+
+\pagebreak
+\noindent
+\textbf{Student Names:} Ergün ERDOĞMUŞ, Mustafa Enes ÇAKIR \\
+\textbf{Student IDs:} 2014400006, 2013400105 \\
+\textbf{Group ID:} 2 \\
+\textbf{Session:} 2
+
+\subsection*{Combinational Logic}
+	\includegraphics[width=400pt,keepaspectratio]{exp3-ckt.png}
+\end{document}

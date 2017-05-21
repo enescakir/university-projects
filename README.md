@@ -16,6 +16,11 @@ Programming projects that I have written at university
 - [Project 2](/cmpe230/project2) `Python 3`
 
 ### [CmpE240 - Digital Systems](/cmpe240)
+- [Experiment 1 Preliminary Work](/cmpe240/exp1) `Verilog`
+- [Experiment 2 Preliminary Work](/cmpe240/exp2) `Verilog`
+- [Experiment 3 Preliminary Work](/cmpe240/exp3) `Verilog`
+- [Experiment 4 Preliminary Work](/cmpe240/exp4) `Verilog`
+- [Experiment 5 Preliminary Work](/cmpe240/exp5) `Verilog`
 
 ### [CmpE250 - Data Structures and Algorithms](/cmpe250)
 - [Project 1](/cmpe250/project1) `C++`

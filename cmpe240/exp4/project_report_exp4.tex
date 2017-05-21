@@ -1,0 +1,122 @@
+\documentclass[12pt,a4paper]{report}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{fullpage}
+\usepackage{graphicx}
+
+\title{CMPE 240 Experiment 4 Preliminary Work}
+\begin{document}
+
+\noindent
+\textbf{Student Names:} Ergün ERDOĞMUŞ, Mustafa Enes ÇAKIR \\
+\textbf{Student IDs:} 2014400006, 2013400105 \\
+\textbf{Group ID:} 2
+
+\section*{CMPE 240 Experiment 4 Preliminary Work}
+
+\subsection*{Step 1}
+
+State the inputs and outputs of the state registers.
+
+\begin{itemize}
+	\item[$\Rightarrow$] Inputs: $n_2, n_1, n_0, $
+	\item[$\Rightarrow$] Outputs: $s_2, s_1, s_0, $
+\end{itemize}
+
+\subsection*{Step 2}
+
+State the inputs and outputs of the combinational block of the sequential circuit.
+
+\begin{itemize}
+	\item[$\Rightarrow$] Inputs: $s_2, s_1, s_0, x $
+	\item[$\Rightarrow$] Outputs: $n_2, n_1, n_0, y_1, y_0$
+\end{itemize}
+
+\subsection*{Step 3}
+
+Write each output (including next state bits) as a function of the inputs.
+\\
+$n_2$ = $x s_2 s_1's_0' + x s_2' s_1 s_0$\\
+$n_1$ = $x s_2's_1' s_0 + x s_2' s_1 s_0'$ \\
+$n_0$ = $x' s_2 s_1' s_0' + x' s_2' + x s_2' s_1 s_0'$\\
+$y_1$ = $x' s_2 s_1' s_0' + x' s_2' s_1 s_0$\\
+$y_0$ = $x' s_2 s_1' s_0' + x' s_2' s_1 s_0'$\\
+
+\pagebreak
+\noindent
+\textbf{Student Names:} Ergün ERDOĞMUŞ, Mustafa Enes ÇAKIR \\
+\textbf{Student IDs:} 2014400006, 2013400105 \\
+\textbf{Group ID:} 2
+
+\subsection*{Step 4}
+
+Draw the truth table for the combinational circuit.
+\begin{center}
+	\begin{tabular}{|c|cccc|ccccc|}
+		\hline
+		\textbf{\#} & \textbf{S2} & \textbf{S1} & \textbf{S0} & \textbf{X} & \textbf{N2} & \textbf{N1} & \textbf{N0} & \textbf{Y1} & \textbf{Y0} \\
+		\hline
+		0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 \\
+		\hline
+		1 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 \\
+		\hline
+		2 & 0 & 0 & 1 & 0 & 0 & 0 & 1 & 0 & 0 \\
+		\hline
+		3 & 0 & 0 & 1 & 1 & 0 & 1 & 0 & 0 & 0 \\
+		\hline
+		4 & 0 & 1 & 0 & 0 & 0 & 0 & 1 & 0 & 1 \\
+		\hline
+		5 & 0 & 1 & 0 & 1 & 0 & 1 & 1 & 0 & 0 \\
+		\hline
+		6 & 0 & 1 & 1 & 0 & 0 & 0 & 1 & 1 & 0 \\
+		\hline
+		7 & 0 & 1 & 1 & 1 & 1 & 0 & 0 & 0 & 0 \\
+		\hline
+		8 & 1 & 0 & 0 & 0 & 0 & 0 & 1 & 1 & 1 \\
+		\hline
+		9 & 1 & 0 & 0 & 1 & 1 & 0 & 0 & 0 & 0 \\
+		\hline
+		10 & 1 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 \\
+		\hline
+		11 & 1 & 0 & 1 & 1 & 0 & 0 & 0 & 0 & 0 \\
+		\hline
+		12 & 1 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+		\hline
+		13 & 1 & 1 & 0 & 1 & 0 & 0 & 0 & 0 & 0 \\
+		\hline
+		14 & 1 & 1 & 1 & 0 & 0 & 0 & 0 & 0 & 0 \\
+		\hline
+		15 & 1 & 1 & 1 & 1 & 0 & 0 & 0 & 0 & 0 \\
+		\hline
+	\end{tabular}
+\end{center}
+
+\subsection*{Step 5}
+Draw the finite state machine by using the truth table.
+\begin{center}
+	\includegraphics[width=400pt,keepaspectratio]{exp4-fsm.png}
+\end{center}
+
+\pagebreak
+\noindent
+\textbf{Student Names:} Ergün ERDOĞMUŞ, Mustafa Enes ÇAKIR \\
+\textbf{Student IDs:} 2014400006, 2013400105 \\
+\textbf{Group ID:} 2
+
+\subsection*{Step 6}
+How many unreachable states does the finite state machine contain? (No explanation, only short answer).
+\begin{itemize}
+	\item[$\Rightarrow$] \# of Unreachable States: 3
+\end{itemize}
+
+\subsection*{Step 7}
+
+Briefly explain the relation between the input and the output.
+
+\begin{itemize}
+	\item[$\Rightarrow$] Explanation: In this FSM, output depends not solely on the state but also on the given input. What it does is this: after a start with 0 it counts the number of consecutive 1's up to 3 with start and end with 0 (like 0110). If the count is 0, outputs 0; if the count is 1, output is 01; if the count is 2, output is 10 and if the count is 3, output is 11. If the count is greater than 1, it also outputs 11.
+\end{itemize}
+
+\end{document}
