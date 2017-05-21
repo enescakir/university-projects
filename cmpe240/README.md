@@ -4,7 +4,8 @@
 | Spring 2017  | Alper Şen  |
 
 My partner was [Ergün Erdoğmuş](https://github.com/ergun1017).
-You can open `.circ` files with [Logisim](http://www.cburch.com/logisim/)
+
+You can open `.circ` files with [Logisim](http://www.cburch.com/logisim/).
 
 ### [Experiment 1 Preliminary Work](/cmpe240/exp1) `Verilog`
 ### [Experiment 2 Preliminary Work](/cmpe240/exp2) `Verilog`
