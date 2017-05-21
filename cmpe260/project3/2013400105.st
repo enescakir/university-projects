@@ -1,2 +1,2238 @@
-Object subclass: #Dota	instanceVariableNames: ''	classVariableNames: ''	poolDictionaries: ''	category: '2013400105'!!Dota commentStamp: 'EnesCakir 5/20/2017 23:11' prior: 0!Mustafa Enes CAKIR2013400105CmpE260 Spring 2017Project 3 - Smalltalk!Dota subclass: #GameArena	instanceVariableNames: 'turn'	classVariableNames: ''	poolDictionaries: ''	category: '2013400105'!"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!GameArena class	instanceVariableNames: ''!!GameArena class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 22:00'!effectPassiveSkills: player	"Adds passive skills effects to hero"	|skill hero|	hero := player getHero.		"Check Skill 1"	skill := hero getSkill1.	skill getIsPassive = true		ifTrue:[			"Heals itself with the % of the given damage"			hero setHealsWithDamagePerc: ((hero getHealsWithDamagePerc) + (skill getHealsWithDamagePerc)).			"% chance of evasion"			hero setEvasionChance: ((hero getEvasionChance) + (skill getEvasionChance)).			"Decrease Enemy Mana per attack"			hero setEnemyManaDescPerAttack: ((hero getEnemyManaDescPerAttack) + (skill getEnemyManaDescPerAttack)).			"x2 Damage with % chance"			hero setDamageDoubleChance: ((hero getDamageDoubleChance ) + (skill getDamageDoubleChance)).			"x3 Damage with % chance"			hero setDamageTripleChance: ((hero getDamageTripleChance ) + (skill getDamageTripleChance)).			"x4 Damage with % chance"			hero setDamageQuadChance: ((hero getDamageQuadChance ) + (skill getDamageQuadChance)).		].	"Check Skill 2"	skill := hero getSkill2.	skill getIsPassive = true		ifTrue:[			hero setHealsWithDamagePerc: ((hero getHealsWithDamagePerc) + (skill getHealsWithDamagePerc)).			hero setEvasionChance: ((hero getEvasionChance) + (skill getEvasionChance)).			hero setEnemyManaDescPerAttack: ((hero getEnemyManaDescPerAttack) + (skill getEnemyManaDescPerAttack)).			hero setDamageDoubleChance: ((hero getDamageDoubleChance ) + (skill getDamageDoubleChance)).			hero setDamageTripleChance: ((hero getDamageTripleChance ) + (skill getDamageTripleChance)).			hero setDamageQuadChance: ((hero getDamageQuadChance ) + (skill getDamageQuadChance)).		].! !!GameArena class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 22:59'!playTurn: player vs: player2	"Gets action of a player for one turn"	|actionsList isTurnEnded hero hero2 attackButton hpButton manaButton skill1Button skill2Button chosenButton actualDamage effectiveSkills effectiveEnemySkills|	hero := player getHero.	hero2 := player2 getHero.	isTurnEnded := false.		"Apply passive effect for this turn"	self applyPassiveSkills: hero enemy: hero2.		"Creates buttons"	attackButton := 'Attack'.	hpButton := 'Use Health Potion'.	manaButton := 'Use Mana Potion'.	skill1Button := hero getSkill1 className.	skill2Button := hero getSkill2 className.		"Get effective skills of players"	effectiveSkills := hero getEffectiveSkills.	effectiveEnemySkills := hero2 getEffectiveSkills.		"All the time player has attack action"	actionsList := {attackButton}.	"If player has HP potion add button"	hero getHpPotions isEmpty	ifFalse: [ actionsList := actionsList, { hpButton }].	"If player has Mana potion add button"	hero getManaPotions isEmpty	ifFalse: [ actionsList := actionsList, { manaButton }].	"If first skill isn't passive and not in cooldown add button"	hero getSkill1 getIsPassive = false & hero getSkill1 getRemainingCooldownTurn = 0		ifTrue: [ actionsList := actionsList, { skill1Button }].	"If second skill isn't passive and not in cooldown add button"	hero getSkill2 getIsPassive = false & hero getSkill2 getRemainingCooldownTurn = 0		ifTrue: [ actionsList := actionsList, { skill2Button }].		"Apply effecctive skills"	effectiveSkills do: [ :skill |		"Pulse Nova mana check"		hero getMana >= skill getManaUsageTurn		ifTrue:[			hero setMana: (hero getMana) - (skill getManaUsageTurn).			hero2 setHp: ((hero2 getHp) - (skill getSpellDamage) ).		]		ifFalse:[			"Close Pulse Nova"			skill setRemainingEffectTurn: 0.		]	].	[isTurnEnded = false]	whileTrue: [		"Ask to player action"		chosenButton := actionsList at: (UIManager default chooseFrom: actionsList message: (player getName), ' turn (' , (player getHero) className, ')').		chosenButton = attackButton			ifTrue: [				"Calculate enemy evasion chance"				(self happenChance: (hero2 getEvasionChance)) = false				ifTrue: [ 					"Calculate RAW damage"					actualDamage := hero calculateDamage: (hero2 getArmor).					"Look damage multiply chance comes from Passive Skills and Items"					(self happenChance: (hero getDamageQuadChance)) = true					ifTrue: [ actualDamage := actualDamage * 4 ]					ifFalse: [ 						(self happenChance: (hero getDamageTripleChance)) = true							ifTrue: [ actualDamage := actualDamage * 3 ]							ifFalse: [ 								(self happenChance: (hero getDamageDoubleChance)) = true									ifTrue: [ actualDamage := actualDamage * 2 ].							].					].						"Vangaurd item effect"					(self happenChance: (hero2 getDamageDesc60Chance)) = true						ifTrue: [ actualDamage := actualDamage - 60 ].										"Anchor Smash effect"					effectiveEnemySkills do: [ :skill |						actualDamage := actualDamage * ((100 - (skill getEnemyAttackDescPerc)) / 100).					].									"Look damage multiply chance comes from Active Skills"					effectiveSkills do: [ :skill |						(self happenChance: (skill getDamageQuadChance)) = true							ifTrue: [ actualDamage := actualDamage * 4 ]							ifFalse: [ 								(self happenChance: (skill getDamageTripleChance)) = true									ifTrue: [ actualDamage := actualDamage * 3 ]									ifFalse: [ 										(self happenChance: (skill getDamageDoubleChance)) = true											ifTrue: [ actualDamage := actualDamage * 2 ].									].							].					].					"Set new enemy HP with Vampiric Aura effect"					hero2 setHp: ((hero2 getHp) - (actualDamage * (100 - (hero2 getHealsWithDamagePerc))/100 )).				].				"Mana Break effect"				hero2 setMana: ((hero2 getMana) - (hero getEnemyManaDescPerAttack)).				isTurnEnded := true.				player setLastAction: 'Attack'.			].		"Use HP potion"		chosenButton = hpButton			ifTrue: [				hero setHp: hero getHp + 300.				hero removeHpPotion.				isTurnEnded := true.				player setLastAction: 'HP Potion'.			].		"Use Mana potion"		chosenButton = manaButton			ifTrue: [				hero setMana: hero getMana + 300.				hero removeManaPotion.				isTurnEnded := true.				player setLastAction: 'Mana Potion'.			].		"Use Skill 1"		chosenButton = skill1Button			ifTrue: [				(hero getMana) >= ((hero getSkill1) getManaUsage)				ifTrue:[					self useSkill: player enemy: player2 skill: (hero getSkill1).					isTurnEnded := true.					player setLastAction: skill1Button.				]				ifFalse:[					Transcript cr; cr; show: (player getName); show: ' doesn''t have enough mana.'.				].			].		"Use Skill 2"		chosenButton = skill2Button			ifTrue: [				(hero getMana) >= ((hero getSkill2) getManaUsage)				ifTrue:[					self useSkill: player enemy: player2 skill: (hero getSkill2).					isTurnEnded := true.					player setLastAction: skill2Button.				]				ifFalse:[					Transcript cr; cr; show: (player getName); show: ' doesn''t have enough mana.'.				].			].	].	! !!GameArena class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 22:47'!marketForPlayer: player enemy: enemy maxCapacity: maxCapacity minCost: minCost	"All the market activies of given player"	|itemList chosenItem usedCapacity count countDict|	usedCapacity := 0.0.	itemList := Item subclasses.	"Keep item:count pair in the Dictionary"	countDict := Dictionary new.	itemList do:[ :item | countDict at: (item asString) put:0 .].	"Buy until money out or capacity out"	[((player getGold) >= minCost) & (usedCapacity < maxCapacity)]	whileTrue: [		"Ask to buy"		chosenItem := (itemList at:(UIManager default			chooseFrom: itemList			message: 'Choose an Item for ', player getName,				' (Remaining item slot = ', (maxCapacity - usedCapacity) asString,				', Remaining gold = ', (player getGold) asString, ')'))			new.		"Not enough money"		player getGold < chosenItem getCost		ifTrue: [			Transcript cr;show:(player getName ); show: ' can''t afford '; show: chosenItem;				cr; show: 'It''s '; show:(chosenItem getCost); show:' golds and ';					show:(player getName ); show:' has just '; show: player getGold; show:' golds'.		]		ifFalse: [			"Not enough capacity"			(usedCapacity) + (chosenItem getWeight) > maxCapacity			ifTrue: [				Transcript cr;show: chosenItem; show: ' is too heavy.';					cr; show:(player getName ); show:' has '; show:(maxCapacity - usedCapacity); show:' empty slots.'.			]			ifFalse:[				"Increase count"				count := (countDict at: (chosenItem className)).				countDict at: (chosenItem className) put: (count + 1).				"Buy item"				self buyItem: chosenItem player: player enemy: enemy count: (countDict at: (chosenItem className)).			].		].		usedCapacity := ((player getHero) calculateWeight).	].! !!GameArena class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 21:51'!start	"This method is the main of the game. The hero selection, buying items etc. and the turn-based game is implemented in this method."	|scourgeList sentinelList chosenHero player1 player2 minCost maxCapacity initialGold winner|	"Game global variables"	initialGold := 11000.	minCost := 200.	maxCapacity := 4.	"Open new Transcript"	Transcript  open; clear.		"Choose a Scourge hero and create Player 1"	scourgeList := Scourge subclasses.	chosenHero := (scourgeList at: (UIManager default chooseFrom: scourgeList message: 'Choose a hero from Scourge list for Player 1')) new.	player1 := Player newPlayer: 'Player 1' faction: Scourge choosenHero: chosenHero initialGold: initialGold.	"Choose a Sentinel hero and create Player 2"	sentinelList := Sentinel subclasses.	chosenHero := (sentinelList at: (UIManager default chooseFrom: sentinelList message: 'Choose a hero from Sentinel list for Player 2')) new.	player2 := Player newPlayer: 'Player 2' faction: Sentinel choosenHero: chosenHero initialGold: initialGold.	"Add Passive Skill effect to players"	self effectPassiveSkills: player1.	self effectPassiveSkills: player2.	"Buy some items for Player 1"	self marketForPlayer: player1 enemy: player2 maxCapacity: maxCapacity  minCost: minCost.	"Buy some items for Player 2"	self marketForPlayer: player2 enemy: player1 maxCapacity: maxCapacity  minCost: minCost.	"So far, we have chosen our heroes and buy items for them, now it is turn to play the game"	Transcript cr; show: '==== The game is started ===='.		"Loop until one of the player is dead"	[(player1 isDead = false) & ( player2 isDead = false)]	whileTrue: [		"Prints current status"		Transcript cr; cr; show:'==== '; show: player1 getName; show: '''s turn!! ===='.		player1 printStatus.		player2 printStatus.				"Player 1 plays turn"		self playTurn: player1 vs: player2.			"Reduce remaining skill countdown turns for Player 1"		self reduceCooldowns: player1.		self reduceEffectTurns: player1.				"If Player 2 isn't dead after Player 1 attack, it play its turn"		player2 isDead = false			ifTrue: [				Transcript cr; cr; show:'==== '; show: player2 getName; show: '''s turn!! ===='.				player1 printStatus.				player2 printStatus.				self playTurn: player2 vs: player1.			].		self reduceCooldowns: player2.		self reduceEffectTurns: player2.			].	"If HP of an hero reaches to zero, the game ends as it goes out of the loop".	Transcript cr; cr;show:'==== The game is finished ===='.	player1 printStatus.	player2 printStatus.		"Deciding winner."	player1 isDead = false		ifTrue: [ winner := player1]		ifFalse: [ winner := player2].	Transcript cr; cr; show: '==== '; show: winner getName; show: ' ('; show: winner getHero className; show:') is the winner of the game ===='.	! !!GameArena class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 21:53'!applyPassiveSkills: hero enemy: enemy	"Apply passive effects to hero"	"+ Mana at each turn"	hero setMana: hero getMana + hero getManaIncTurn.	"Heals itself with the 15% of the given damage"	hero setHp: (hero getHp) * ((hero getHpIncPercTurn + 100) / 100).! !!GameArena class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 23:01'!reduceCooldowns: player	"Reduces remaining cooldown of used skills"	|skill|	skill := (player getHero) getSkill1.	skill getRemainingCooldownTurn ~= 0		ifTrue:[skill setRemainingCooldownTurn: (skill getRemainingCooldownTurn - 1)].	skill := (player getHero) getSkill2.	skill getRemainingCooldownTurn ~= 0		ifTrue:[skill setRemainingCooldownTurn: (skill getRemainingCooldownTurn - 1)].! !!GameArena class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 22:00'!happenChance: perc	"Calculates chance to happen given percantage"	|chance|	chance := (1 to: 100) atRandom.	chance <= perc		ifTrue: [ ^true ]		ifFalse: [ ^false ].! !!GameArena class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 23:05'!useSkill: player enemy: enemy skill: skill	"Effect given skill on enemy hero"	|hero enemyHero skillDamage|	hero := player getHero.	enemyHero := enemy getHero.		"Descrease mana usage"	hero setMana: ((hero getMana) - (skill getManaUsage)).		"Activate skills"	"It's adding +1 because their effect starts next turn"	skill setRemainingCooldownTurn: ((skill getCooldownTurn) + 1).	skill setRemainingEffectTurn: ((skill getEffectTurn) + 1).		"Calculate skill happen chance"	(self happenChance: (skill getChance)) = true		ifTrue: [			"Calculate skill damage"			"% (enemy missing mana) as Damage AND Hood of Defance effect"			skillDamage := ((skill getDamage) + ((skill getMissingManaToDamagePerc) * (enemyHero getMaxMana - enemyHero getMana))) 				* ((100 - enemyHero getSkillDamageDescPerc) / 100).			enemyHero setHp: ((enemyHero getHp) - skillDamage).			"Mana Burn effect"			enemyHero setMana: ((enemyHero getMana) * ((100 - skill getEnemyManaDescPerc) / 100)).		].! !!GameArena class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 21:58'!buyItem: item player: player enemy: enemy count: count	"Adds item to hero bag, and add effects to hero"	|hero|	hero := player getHero.	player setGold: (player getGold) - (item getCost).	"EFFECTS"	"+ Damage"	hero setMinDamage: ((hero getMinDamage) + (item getDamage))		setMaxDamage: ((hero getMaxDamage) + (item getDamage)).	"+ Max HP"	hero setMaxHp: (hero getMaxHp + item getMaxHpInc).	hero setHp: (hero getMaxHp).	"+ Max Mana"	hero setMaxMana: (hero getMaxMana + item getMaxManaInc).	hero setMana: (hero getMaxMana).	"+ Mana at each turn"	hero setManaIncTurn:  (hero getManaIncTurn + item getManaIncTurn).	"Decrease % of the skill damage taken"	hero setSkillDamageDescPerc:  (hero getSkillDamageDescPerc + (item getSkillDamageDescPerc / count)).	"+ % evasion"	hero setEvasionChance: (hero getEvasionChance + (item getEvasionChance / count)).	"% chance of x2 damage"	hero setDamageDoubleChance: (hero getDamageDoubleChance + (item getDamageDoubleChance / count)).	"Decrease enemy armor (only once)"	(enemy getHero) setArmor: (enemy getHero) getArmor - item getEnemyArmorDesc.	"% chance of decreasing the received damage by 60"	hero setDamageDesc60Chance: (hero getDamageDesc60Chance + (item getDamageDesc60Chance / count)).	"Increase current HP by % at each turn"	hero setHpIncPercTurn:  (hero getHpIncPercTurn + item getHpIncPercTurn).		"Add item to hero's item list"	hero addItem: item.! !!GameArena class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 23:01'!reduceEffectTurns: player	"Reduces remaining effective turn of used skills"	|skill|	skill := (player getHero) getSkill1.	skill getRemainingEffectTurn ~= 0		ifTrue:[skill setRemainingEffectTurn: (skill getRemainingEffectTurn - 1)].	skill := (player getHero) getSkill2.	skill getRemainingEffectTurn ~= 0		ifTrue:[skill setRemainingEffectTurn: (skill getRemainingEffectTurn - 1)].! !Dota subclass: #Hero	instanceVariableNames: 'hp maxHp mana maxMana skill1 skill2 armor minDamage maxDamage items manaPotions hpPotions manaIncTurn manaDescTurn skillDamageDescPerc evasionChance damageDescChance hpIncTurnPerc damageDoubleChance damageTripleChance damageQuadChance hpIncPercTurn healsWithDamagePerc enemyManaDescPerAttack damageDesc60Chance'	classVariableNames: ''	poolDictionaries: ''	category: '2013400105'!!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 00:51'!setMana: initial	mana := ((initial max: 0) min: maxMana) rounded.! !!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 4/28/2017 15:38'!getDamage	^minDamage + '-' + maxDamage.! !!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/18/2017 20:54'!setSkill1: s1 setSkill2: s2	skill1 := s1.	skill2 := s2.! !!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 4/28/2017 15:37'!getMaxDamage	^maxDamage.! !!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 19:30'!setManaDescTurn: initial	manaDescTurn := initial.! !!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 4/28/2017 17:17'!setMaxMana: initial	maxMana := initial.! !!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/18/2017 19:17'!getCoolDownSkills	|coolDownSkills|	coolDownSkills := #().	skill1 getRemainingCooldownTurn ~= 0	ifTrue:[coolDownSkills := coolDownSkills , {skill1}.].	skill2 getRemainingCooldownTurn ~= 0	ifTrue:[coolDownSkills := coolDownSkills , {skill2}.].	^coolDownSkills.! !!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 23:09'!calculateWeight	"Calculates used slot capacity"	^(((manaPotions size) + (hpPotions size)) * 0.5) + ((items size) * 1.0).! !!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 00:41'!getItems	^items.! !!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 23:08'!addItem: item	"Adds item to hero's item lists"	item getIsHpPotion = true		ifTrue: [hpPotions add: item.].	item getIsManaPotion = true		ifTrue: [manaPotions add: item.].	(item getIsHpPotion) = true | (item getIsManaPotion) = true		ifFalse: [items add: item.].! !!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/18/2017 23:07'!setDamageTripleChance: initial	damageTripleChance := initial.! !!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 4/28/2017 17:31'!setMinDamage: min setMaxDamage: max	minDamage := min.	maxDamage := max.! !!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 4/28/2017 15:35'!getSkill2	^skill2.! !!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 19:28'!getManaIncTurn	^manaIncTurn.! !!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 17:04'!removeManaPotion	manaPotions remove: (manaPotions at: 1).! !!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 4/28/2017 17:13'!getHp	^hp.! !!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 4/28/2017 15:35'!getSkill1	^skill1.! !!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 23:09'!removeHpPotion	hpPotions remove: (hpPotions at: 1).! !!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/18/2017 23:07'!getDamageQuadChance	^damageQuadChance.! !!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 4/28/2017 17:15'!getMaxHp	^maxHp.! !!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 4/28/2017 15:41'!setArmor: initial	armor := initial.! !!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 00:41'!getManaPotions	^manaPotions.! !!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 17:18'!createInitialLists	items := LinkedList new.	manaPotions := LinkedList new.	hpPotions := LinkedList new.! !!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 4/28/2017 17:16'!setMaxHp: initial	maxHp := initial.! !!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 19:29'!getHpIncTurnPerc	^hpIncTurnPerc.! !!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 10:06'!setDamageDesc60Chance: initial	damageDesc60Chance := initial.! !!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 19:29'!getEvasionChance	^evasionChance.! !!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 4/28/2017 15:35'!getMana	^mana.! !!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 10:06'!setHpIncPercTurn: initial	hpIncPercTurn := initial.! !!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 19:30'!setHpIncTurnPerc: initial	hpIncTurnPerc := initial.! !!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 19:29'!getDamageDescChance	^damageDescChance.! !!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 00:51'!setHp: initial	hp := ((initial max: 0) min: maxHp) rounded.! !!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 4/28/2017 15:37'!getArmor	^armor.! !!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 22:17'!setDefaults	self setManaIncTurn: 0.	self setManaDescTurn: 0.	self setSkillDamageDescPerc: 0.	self setEvasionChance: 0.	self setDamageDoubleChance: 0.	self setDamageTripleChance: 0.	self setDamageQuadChance: 0.	self setDamageDescChance: 0.	self setHpIncPercTurn: 0.	self setHealsWithDamagePerc: 0.	self setEnemyManaDescPerAttack: 0.	self setDamageDesc60Chance: 0.! !!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 00:41'!getHpPotions	^hpPotions.! !!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 15:32'!setHealsWithDamagePerc: initial	healsWithDamagePerc := initial.! !!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 19:29'!setManaIncTurn: initial	manaIncTurn := initial.! !!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 15:27'!getEnemyManaDescPerAttack	^enemyManaDescPerAttack.! !!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 23:09'!calculateDamage: enemyArmor	"Calculates actual damage for attack"	|actualDamage givenDamage|	givenDamage := (minDamage to: maxDamage) atRandom.	actualDamage := givenDamage * (1 - ((0.06 * enemyArmor/(1.0 + (0.06 * enemyArmor))))).	^actualDamage rounded.! !!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 19:29'!getDamageDoubleChance	^damageDoubleChance.! !!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 10:05'!getHpIncPercTurn	^hpIncPercTurn.! !!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 19:30'!setSkillDamageDescPerc: initial	skillDamageDescPerc := initial.! !!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 10:05'!getDamageDesc60Chance	^damageDesc60Chance.! !!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 4/28/2017 15:35'!getSkills	^skill1, skill2.! !!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/18/2017 23:07'!setDamageQuadChance: initial	damageQuadChance := initial.! !!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 19:30'!setEvasionChance: initial	evasionChance := initial.! !!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 22:55'!getEffectiveSkills	|effectiveSkills|	effectiveSkills := #().	skill1 getRemainingEffectTurn ~= 0	ifTrue:[effectiveSkills := effectiveSkills , {skill1}.].	skill2 getRemainingEffectTurn ~= 0	ifTrue:[effectiveSkills := effectiveSkills , {skill2}.].	^effectiveSkills.! !!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 4/28/2017 15:37'!getMinDamage	^minDamage.! !!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 15:26'!getHealsWithDamagePerc	^healsWithDamagePerc.! !!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 19:28'!getManaDescTurn	^manaDescTurn.! !!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 19:28'!getSkillDamageDescPerc	^skillDamageDescPerc.! !!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 19:30'!setDamageDoubleChance: initial	damageDoubleChance := initial.! !!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 4/28/2017 17:15'!getMaxMana	^maxMana.! !!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 15:33'!setEnemyManaDescPerAttack: initial	enemyManaDescPerAttack := initial.! !!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/18/2017 23:07'!getDamageTripleChance	^damageTripleChance.! !!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 19:30'!setDamageDescChance: initial	damageDescChance := initial.! !"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!Hero class	instanceVariableNames: ''!!Hero class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 4/28/2017 15:49'!new	^self subclassResponsibility.! !Dota subclass: #Item	instanceVariableNames: 'cost isHpPotion isManaPotion weight damage skillDamageDescPerc manaIncTurn maxHpInc maxManaInc evasionChance damageDoubleChance enemyArmorDesc hpIncPercTurn damageDesc60Chance'	classVariableNames: 'totalCount'	poolDictionaries: ''	category: '2013400105'!!Item methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 10:05'!getHpIncPercTurn	^hpIncPercTurn.! !!Item methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 10:05'!setSkillDamageDescPerc: initial	skillDamageDescPerc := initial.! !!Item methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 12:41'!getTotalCount	^totalCount.! !!Item methodsFor: 'as yet unclassified' stamp: 'EnesCakir 4/28/2017 17:59'!getCost	^cost.! !!Item methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 18:21'!incTotalCount	totalCount := totalCount + 1! !!Item methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 10:03'!getSkillDamageDescPerc	^skillDamageDescPerc.! !!Item methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/16/2017 18:43'!getIsHpPotion	^isHpPotion.! !!Item methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 22:17'!setDefaults	self setDamage: 0.	self setSkillDamageDescPerc: 0.	self setManaIncTurn: 0.	self setMaxHpInc: 0.	self setMaxManaInc: 0.	self setEvasionChance: 0.	self setDamageDoubleChance: 0.	self setEnemyArmorDesc: 0.	self setHpIncPercTurn: 0.	self setDamageDesc60Chance: 0.! !!Item methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 10:05'!getDamageDesc60Chance	^damageDesc60Chance.! !!Item methodsFor: 'as yet unclassified' stamp: 'EnesCakir 4/28/2017 18:01'!setCost: initial	cost := initial.! !!Item methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 10:04'!getEvasionChance	^evasionChance.! !!Item methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/16/2017 18:44'!getIsManaPotion	^isManaPotion.! !!Item methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 10:04'!getMaxManaInc	^maxManaInc.! !!Item methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 10:04'!getDamageDoubleChance	^damageDoubleChance.! !!Item methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/16/2017 18:44'!setIsHpPotion: initial	isHpPotion := initial.! !!Item methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 10:04'!getMaxHpInc	^maxHpInc.! !!Item methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 10:06'!setMaxManaInc: initial	maxManaInc := initial.! !!Item methodsFor: 'as yet unclassified' stamp: 'EnesCakir 4/28/2017 18:02'!setDamage: initial	damage := initial.! !!Item methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 10:06'!setEvasionChance: initial	evasionChance := initial.! !!Item methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 10:06'!setHpIncPercTurn: initial	hpIncPercTurn := initial.! !!Item methodsFor: 'as yet unclassified' stamp: 'EnesCakir 4/28/2017 18:04'!setWeight: initial	weight := initial.! !!Item methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/18/2017 23:29'!setTotalCount: initial	totalCount := initial.! !!Item methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 10:06'!setDamageDoubleChance: initial	damageDoubleChance := initial.! !!Item methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 10:05'!setManaIncTurn: initial	manaIncTurn := initial.! !!Item methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 10:06'!setEnemyArmorDesc: initial	enemyArmorDesc := initial.! !!Item methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 10:04'!getEnemyArmorDesc	^enemyArmorDesc.! !!Item methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/18/2017 23:30'!descTotalCount	totalCount := totalCount - 1.! !!Item methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 10:05'!setMaxHpInc: initial	maxHpInc := initial.! !!Item methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 10:06'!setDamageDesc60Chance: initial	damageDesc60Chance := initial.! !!Item methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 10:04'!getManaIncTurn	^manaIncTurn.! !!Item methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/16/2017 18:44'!setIsManaPotion: initial	isManaPotion := initial.! !!Item methodsFor: 'as yet unclassified' stamp: 'EnesCakir 4/28/2017 18:01'!getWeight	^weight.! !!Item methodsFor: 'as yet unclassified' stamp: 'EnesCakir 4/28/2017 18:00'!getDamage	^damage.! !"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!Item class	instanceVariableNames: ''!!Item class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 4/28/2017 15:49'!new	^self subclassResponsibility.! !Item subclass: #BattleFury	instanceVariableNames: ''	classVariableNames: ''	poolDictionaries: ''	category: '2013400105'!"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!BattleFury class	instanceVariableNames: ''!!BattleFury class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 10:20'!new	|item|	item := self basicNew.	item setDefaults.	item setCost: 4500.	item setWeight: 1.0.	item setDamage: 55.	item setManaIncTurn: 50.	^item.! !Item subclass: #Butterfly	instanceVariableNames: ''	classVariableNames: ''	poolDictionaries: ''	category: '2013400105'!"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!Butterfly class	instanceVariableNames: ''!!Butterfly class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 10:21'!new	|item|	item := self basicNew.	item setDefaults.	item setCost: 5500.	item setWeight: 1.0.	item setDamage: 30.	item setEvasionChance: 25.	^item.! !Item subclass: #Daedalus	instanceVariableNames: ''	classVariableNames: ''	poolDictionaries: ''	category: '2013400105'!"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!Daedalus class	instanceVariableNames: ''!!Daedalus class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 10:21'!new	|item|	item := self basicNew.	item setDefaults.	item setCost: 5500.	item setWeight: 1.0.	item setDamage: 75.	item setDamageDoubleChance: 25.	^item.! !Item subclass: #Desolator	instanceVariableNames: ''	classVariableNames: ''	poolDictionaries: ''	category: '2013400105'!"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!Desolator class	instanceVariableNames: ''!!Desolator class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 10:22'!new	|item|	item := self basicNew.	item setDefaults.	item setCost: 4000.	item setWeight: 1.0.	item setDamage: 50.	item setEnemyArmorDesc: 5.	^item.! !Item subclass: #EnergyBooster	instanceVariableNames: ''	classVariableNames: ''	poolDictionaries: ''	category: '2013400105'!"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!EnergyBooster class	instanceVariableNames: ''!!EnergyBooster class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 10:22'!new	|item|	item := self basicNew.	item setDefaults.	item setCost: 1100.	item setWeight: 1.0.	item setMaxManaInc: 250.	^item.! !Item subclass: #HealthPotion	instanceVariableNames: ''	classVariableNames: ''	poolDictionaries: ''	category: '2013400105'!"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!HealthPotion class	instanceVariableNames: ''!!HealthPotion class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 10:11'!new	|item|	item := self basicNew.	item setDefaults.	item setCost: 200.	item setWeight: 0.5.	item setIsHpPotion: true.	^item.! !Item subclass: #HeartOfTarrasque	instanceVariableNames: ''	classVariableNames: ''	poolDictionaries: ''	category: '2013400105'!"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!HeartOfTarrasque class	instanceVariableNames: ''!!HeartOfTarrasque class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 10:23'!new	|item|	item := self basicNew.	item setDefaults.	item setCost: 5600.	item setWeight: 1.0.	item setMaxHpInc: 250.	item setHpIncPercTurn: 7.	^item.! !Item subclass: #HoodOfDefiance	instanceVariableNames: ''	classVariableNames: ''	poolDictionaries: ''	category: '2013400105'!"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!HoodOfDefiance class	instanceVariableNames: ''!!HoodOfDefiance class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 10:23'!new	|item|	item := self basicNew.	item setDefaults.	item setCost: 2000.	item setWeight: 1.0.	item setSkillDamageDescPerc: 25.	^item.! !Item subclass: #ManaPotion	instanceVariableNames: ''	classVariableNames: ''	poolDictionaries: ''	category: '2013400105'!"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!ManaPotion class	instanceVariableNames: ''!!ManaPotion class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 10:11'!new	|item|	item := self basicNew.	item setDefaults.	item setCost: 200.	item setWeight: 0.5.	item setIsManaPotion: true.	^item.! !Dota subclass: #Player	instanceVariableNames: 'faction name hero gold lastAction'	classVariableNames: ''	poolDictionaries: ''	category: '2013400105'!!Player methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 14:11'!setLastAction: initial	lastAction := initial.! !!Player methodsFor: 'as yet unclassified' stamp: 'EnesCakir 4/28/2017 22:39'!setFaction: initial	faction := initial.! !!Player methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 00:06'!setName: initial	name := initial.! !!Player methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 00:06'!getName	^name.! !!Player methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 23:07'!getFaction	"Return faction of hero. For just best practice"	^faction.! !!Player methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 23:06'!isDead	"Checks player's hero is dead or not"	(self getHero) getHp = 0	ifTrue: [ ^true. ]	ifFalse: [ ^false. ].! !!Player methodsFor: 'as yet unclassified' stamp: 'EnesCakir 4/28/2017 22:38'!getGold	^gold.! !!Player methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 23:07'!printStatus	"Prints current status of player"	Transcript cr;		cr; show: self getName;		cr; show: 'Hero: '; show: self getHero className;		cr; show: self getHero getHp; show: ' / '; show: self getHero getMaxHp; show: ' HP';		cr; show: self getHero getMana; show: ' / '; show: self getHero getMaxMana; show: ' Mana';		cr; show: 'Last Action: '; show: self getLastAction;		cr; show: 'Remaining Potions: '.	((hero getHpPotions) isEmpty) & ((hero getManaPotions) isEmpty)		ifTrue: [ Transcript show: 'None'. ]		ifFalse: [			(hero getHpPotions isEmpty)				ifTrue:[ Transcript show: (hero getManaPotions) size ; show: ' Mana'. ]				ifFalse:[					(hero getManaPotions isEmpty)						ifTrue:[ Transcript show: (hero getHpPotions) size ; show: ' Health'. ]						ifFalse:[							Transcript show: (hero getHpPotions) size ; show: ' Health, '; show: (hero getManaPotions) size ; show: ' Mana'.						].				].		].	Transcript cr; show: 'Skills in Cooldown: '.	((hero getCoolDownSkills) isEmpty)		ifTrue: [ Transcript show: 'None'. ]		ifFalse: [			(hero getCoolDownSkills) do: [ :skill |				Transcript show: (skill className); show:' (not available for '; show:(skill getRemainingCooldownTurn) asString; show: ' turns) '.			].		].	Transcript cr; show: 'Effective Active Skills: '.	((hero getEffectiveSkills) isEmpty)		ifTrue: [ Transcript show: 'None'. ]		ifFalse: [			(hero getEffectiveSkills) do: [ :skill |				Transcript show: (skill className); show:' (is effective for '; show:(skill getRemainingEffectTurn ) asString; show: ' turns) '.			].		].! !!Player methodsFor: 'as yet unclassified' stamp: 'EnesCakir 4/28/2017 22:39'!setHero: initial	hero := initial.! !!Player methodsFor: 'as yet unclassified' stamp: 'EnesCakir 4/28/2017 22:38'!getHero	^hero.! !!Player methodsFor: 'as yet unclassified' stamp: 'EnesCakir 4/28/2017 22:39'!setGold: initial	gold := initial.! !!Player methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 14:11'!getLastAction	^lastAction.! !"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!Player class	instanceVariableNames: ''!!Player class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 14:26'!newPlayer: username faction: faction choosenHero: hero initialGold: gold	|player|	player := self basicNew.	player setFaction: faction.	player setHero: hero.	player setGold: gold.	player setName: username.	player setLastAction: 'Not played yet'.	^player.! !Hero subclass: #Scourge	instanceVariableNames: ''	classVariableNames: ''	poolDictionaries: ''	category: '2013400105'!Scourge subclass: #Leshrac	instanceVariableNames: ''	classVariableNames: ''	poolDictionaries: ''	category: '2013400105'!"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!Leshrac class	instanceVariableNames: ''!!Leshrac class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 00:41'!new	|hero|	hero := self basicNew.	hero setDefaults.	hero setMaxHp: 1518.	hero setMaxMana: 1534.	hero setHp: 1518.	hero setMana: 1534.	hero setArmor: 12.	hero setMinDamage: 133 setMaxDamage: 137.	hero createInitialLists.	hero setSkill1: (SplitEarth new) setSkill2: (PulseNova new).	^hero.! !Scourge subclass: #Lion	instanceVariableNames: ''	classVariableNames: ''	poolDictionaries: ''	category: '2013400105'!"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!Lion class	instanceVariableNames: ''!!Lion class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 00:41'!new	|hero|	hero := self basicNew.	hero setDefaults.	hero setMaxHp: 1609.	hero setMaxMana: 1456.	hero setHp: 1609.	hero setMana: 1456.	hero setArmor: 9.	hero setMinDamage: 139 setMaxDamage: 145.	hero createInitialLists.	hero setSkill1: (EarthSpike new) setSkill2: (FingerOfDeath new).	^hero.! !Scourge subclass: #Mortred	instanceVariableNames: ''	classVariableNames: ''	poolDictionaries: ''	category: '2013400105'!"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!Mortred class	instanceVariableNames: ''!!Mortred class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 00:41'!new	|hero|	hero := self basicNew.	hero setDefaults.	hero setMaxHp: 1754.	hero setMaxMana: 892.	hero setHp: 1754.	hero setMana: 892.	hero setArmor: 18.	hero setMinDamage: 142 setMaxDamage: 144.	hero createInitialLists.	hero setSkill1: (Blur new) setSkill2: (CoupDeGrace new).	^hero.! !Scourge subclass: #NyxAssassin	instanceVariableNames: ''	classVariableNames: ''	poolDictionaries: ''	category: '2013400105'!"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!NyxAssassin class	instanceVariableNames: ''!!NyxAssassin class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 00:42'!new	|hero|	hero := self basicNew.	hero setDefaults.	hero setMaxHp: 1784.	hero setMaxMana: 1149.	hero setHp: 1784.	hero setMana: 1149.	hero setArmor: 14.	hero setMinDamage: 122 setMaxDamage: 126.	hero createInitialLists.	hero setSkill1: (Impale new) setSkill2: (ManaBurn new).	^hero.! !Hero subclass: #Sentinel	instanceVariableNames: ''	classVariableNames: ''	poolDictionaries: ''	category: '2013400105'!Sentinel subclass: #Earthshaker	instanceVariableNames: ''	classVariableNames: ''	poolDictionaries: ''	category: '2013400105'!"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!Earthshaker class	instanceVariableNames: ''!!Earthshaker class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 00:42'!new	|hero|	hero := self basicNew.	hero setDefaults.	hero setMaxHp: 2270.	hero setMaxMana: 1030.	hero setHp: 2270.	hero setMana: 1030.	hero setArmor: 10.	hero setMinDamage: 136 setMaxDamage: 146.	hero createInitialLists.	hero setSkill1: (Fissure new) setSkill2: (EnchantTotem new).	^hero.! !Sentinel subclass: #Magina	instanceVariableNames: ''	classVariableNames: ''	poolDictionaries: ''	category: '2013400105'!"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!Magina class	instanceVariableNames: ''!!Magina class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 00:42'!new	|hero|	hero := self basicNew.	hero setDefaults.	hero setMaxHp: 1495.	hero setMaxMana: 1017.	hero setHp: 1495.	hero setMana: 1017.	hero setArmor: 14.	hero setMinDamage: 136 setMaxDamage: 140.	hero createInitialLists.	hero setSkill1: (ManaBreak new) setSkill2: (ManaVoid new).	^hero.! !Sentinel subclass: #Mirana	instanceVariableNames: ''	classVariableNames: ''	poolDictionaries: ''	category: '2013400105'!"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!Mirana class	instanceVariableNames: ''!!Mirana class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 00:43'!new	|hero|	hero := self basicNew.	hero setDefaults.	hero setMaxHp: 1697.	hero setMaxMana: 996.	hero setHp: 1697.	hero setMana: 996.	hero setArmor: 16.	hero setMinDamage: 137 setMaxDamage: 148.	hero createInitialLists.	hero setSkill1: (Starstorm new) setSkill2: (SacredArrow new).	^hero.! !Sentinel subclass: #OgreMagi	instanceVariableNames: ''	classVariableNames: ''	poolDictionaries: ''	category: '2013400105'!"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!OgreMagi class	instanceVariableNames: ''!!OgreMagi class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 00:43'!new	|hero|	hero := self basicNew.	hero setDefaults.	hero setMaxHp: 2426.	hero setMaxMana: 1105.	hero setHp: 2426.	hero setMana: 1105.	hero setArmor: 16.	hero setMinDamage: 126 setMaxDamage: 132.	hero createInitialLists.	hero setSkill1: (Fireblast new) setSkill2: (Multicast new).	^hero.! !Sentinel subclass: #Rylai	instanceVariableNames: ''	classVariableNames: ''	poolDictionaries: ''	category: '2013400105'!"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!Rylai class	instanceVariableNames: ''!!Rylai class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 00:43'!new	|hero|	hero := self basicNew.	hero setDefaults.	hero setMaxHp: 1609.	hero setMaxMana: 1373.	hero setHp: 1609.	hero setMana: 1373.	hero setArmor: 9.	hero setMinDamage: 125 setMaxDamage: 131.	hero createInitialLists.	hero setSkill1: (FrostBite new) setSkill2: (FreezingField new).	^hero.! !Scourge subclass: #SkeletonKing	instanceVariableNames: ''	classVariableNames: ''	poolDictionaries: ''	category: '2013400105'!"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!SkeletonKing class	instanceVariableNames: ''!!SkeletonKing class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 00:42'!new	|hero|	hero := self basicNew.	hero setDefaults.	hero setMaxHp: 2270.	hero setMaxMana: 993.	hero setHp: 2270.	hero setMana: 993.	hero setArmor: 11.	hero setMinDamage: 151 setMaxDamage: 153.	hero createInitialLists.	hero setSkill1: (WraithfireBlast new) setSkill2: (VampiricAura new).	^hero.! !Dota subclass: #Skill	instanceVariableNames: 'isPassive remainingCooldownTurn cooldownTurn remainingEffectTurn effectTurn manaUsage manaUsageTurn damage healsWithDamagePerc enemyAttackDescPerc damageDoubleChance damageTripleChance damageQuadChance enemyManaDescPerc evasionChance chance enemyManaDescPerAttack missingManaToDamagePerc spellDamage selfDamageDoubleChance'	classVariableNames: ''	poolDictionaries: ''	category: '2013400105'!!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 15:25'!getDamage	^damage.! !!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 15:24'!getIsPassive	^isPassive.! !!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 15:33'!setEffectTurn: initial	effectTurn := initial.! !!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 15:33'!setChance: initial	chance := initial.! !!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 15:30'!getSpellDamage	^spellDamage.! !!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 15:32'!setRemainingCooldownTurn: initial	remainingCooldownTurn := initial.! !!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 15:32'!setIsPassive: initial	isPassive := initial.! !!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 15:34'!setMissingManaToDamagePerc: initial	missingManaToDamagePerc := initial.! !!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 16:00'!getSelfDamageDoubleChance	^selfDamageDoubleChance.! !!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/18/2017 22:47'!getDamageQuadChance	^damageQuadChance.! !!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/18/2017 22:50'!setDamageDoubleChange: double triple: triple quad: quad	damageDoubleChance  := double.	damageTripleChance := triple.	damageQuadChance := quad.! !!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 15:27'!getRemainingEffectTurn	^remainingEffectTurn.! !!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 15:32'!setManaUsage: initial	manaUsage := initial.! !!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 15:33'!setSelfDamageDoubleChance: initial	selfDamageDoubleChance := initial.! !!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 15:28'!getChance	^chance.! !!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 15:27'!getEvasionChance	^evasionChance.! !!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 15:34'!setSpellDamage: initial	spellDamage := initial.! !!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 19:41'!setManaUsageTurn: initial	manaUsageTurn := initial.! !!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 15:33'!setRemainingEffectTurn: initial	remainingEffectTurn := initial.! !!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 19:41'!setDefaults	self setIsPassive: false.	self setDamage: 0.	self setManaUsage: 0.	self setRemainingCooldownTurn: 0.	self setCooldownTurn: 0.	self setRemainingEffectTurn: 0.	self setEffectTurn: 0.	self setHealsWithDamagePerc: 0.	self setEnemyAttackDescPerc: 0.	self setDamageDoubleChange: 0 triple: 0 quad: 0.	self setEnemyManaDescPerc: 0.	self setEnemyManaDescPerAttack: 0.	self setEvasionChance: 0.	self setChance: 100.	self setEnemyManaDescPerc: 0.	self setMissingManaToDamagePerc: 0.	self setSpellDamage: 0.	self setManaUsageTurn: 0.	self setSelfDamageDoubleChance: 0.	! !!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 15:26'!getRemainingCooldownTurn	^remainingCooldownTurn.! !!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 15:32'!setHealsWithDamagePerc: initial	healsWithDamagePerc := initial.! !!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 16:00'!setEnemyAttackDescPerc: initial	enemyAttackDescPerc := initial.! !!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 15:27'!getEnemyManaDescPerAttack	^enemyManaDescPerAttack.! !!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 15:25'!getManaUsage	^manaUsage.! !!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 15:29'!getMissingManaToDamagePerc	^missingManaToDamagePerc.! !!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 15:27'!getEffectTurn	^effectTurn.! !!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/18/2017 22:47'!getDamageDoubleChance	^damageDoubleChance.! !!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 15:33'!setEvasionChance: initial	evasionChance := initial.! !!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 15:27'!getCooldownTurn	^cooldownTurn.! !!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 15:28'!getEnemyManaDescPerc	^enemyManaDescPerc.! !!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 15:26'!getHealsWithDamagePerc	^healsWithDamagePerc.! !!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 19:41'!getManaUsageTurn	^manaUsageTurn.! !!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 15:33'!setCooldownTurn: initial	cooldownTurn := initial.! !!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 16:00'!getEnemyAttackDescPerc	^enemyAttackDescPerc.! !!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 15:33'!setEnemyManaDescPerc: initial	enemyManaDescPerc := initial.! !!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 15:33'!setEnemyManaDescPerAttack: initial	enemyManaDescPerAttack := initial.! !!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 15:32'!setDamage: initial	damage := initial.! !!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/18/2017 22:47'!getDamageTripleChance	^damageTripleChance.! !Skill subclass: #AnchorSmash	instanceVariableNames: ''	classVariableNames: ''	poolDictionaries: ''	category: '2013400105'!"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!AnchorSmash class	instanceVariableNames: ''!!AnchorSmash class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 00:49'!new	|skill|	skill := self basicNew.	skill setDefaults.	skill setDamage: 225.	skill setEnemyAttackDescPerc: 60.	skill setCooldownTurn: 3.	skill setManaUsage: 60.	skill setEffectTurn: 1.	^skill.! !Skill subclass: #Blur	instanceVariableNames: ''	classVariableNames: ''	poolDictionaries: ''	category: '2013400105'!"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!Blur class	instanceVariableNames: ''!!Blur class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 16:49'!new	|skill|	skill := self basicNew.	skill setDefaults.	skill setIsPassive: true.	skill setEvasionChance: 40.	^skill.! !Skill subclass: #CoupDeGrace	instanceVariableNames: ''	classVariableNames: ''	poolDictionaries: ''	category: '2013400105'!"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!CoupDeGrace class	instanceVariableNames: ''!!CoupDeGrace class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/18/2017 22:50'!new	|skill|	skill := self basicNew.	skill setDefaults.	skill setIsPassive: true.	skill setDamageDoubleChange: 0 triple: 0 quad: 15.	^skill.! !Skill subclass: #EarthSpike	instanceVariableNames: ''	classVariableNames: ''	poolDictionaries: ''	category: '2013400105'!"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!EarthSpike class	instanceVariableNames: ''!!EarthSpike class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 16:50'!new	|skill|	skill := self basicNew.	skill setDefaults.	skill setDamage: 260.	skill setCooldownTurn: 5.	skill setManaUsage: 160.	^skill.! !Skill subclass: #EnchantTotem	instanceVariableNames: ''	classVariableNames: ''	poolDictionaries: ''	category: '2013400105'!"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!EnchantTotem class	instanceVariableNames: ''!!EnchantTotem class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/18/2017 22:51'!new	|skill|	skill := self basicNew.	skill setDefaults.	skill setDamageDoubleChange: 0 triple: 0 quad: 100.	skill setCooldownTurn: 5.	skill setManaUsage: 50.	skill setEffectTurn: 1.	^skill.! !Skill subclass: #FingerOfDeath	instanceVariableNames: ''	classVariableNames: ''	poolDictionaries: ''	category: '2013400105'!"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!FingerOfDeath class	instanceVariableNames: ''!!FingerOfDeath class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 16:50'!new	|skill|	skill := self basicNew.	skill setDefaults.	skill setDamage: 850.	skill setCooldownTurn: 8.	skill setManaUsage: 650.	^skill.! !Skill subclass: #Fireblast	instanceVariableNames: ''	classVariableNames: ''	poolDictionaries: ''	category: '2013400105'!"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!Fireblast class	instanceVariableNames: ''!!Fireblast class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 22:24'!new	|skill|	skill := self basicNew.	skill setDefaults.	skill setDamage: 220.	skill setCooldownTurn: 5.	skill setManaUsage: 225.	skill setSelfDamageDoubleChance: 60.	^skill.! !Skill subclass: #Fissure	instanceVariableNames: ''	classVariableNames: ''	poolDictionaries: ''	category: '2013400105'!"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!Fissure class	instanceVariableNames: ''!!Fissure class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 16:50'!new	|skill|	skill := self basicNew.	skill setDefaults.	skill setDamage: 260.	skill setCooldownTurn: 5.	skill setManaUsage: 170.	^skill.! !Skill subclass: #FreezingField	instanceVariableNames: ''	classVariableNames: ''	poolDictionaries: ''	category: '2013400105'!"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!FreezingField class	instanceVariableNames: ''!!FreezingField class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 16:50'!new	|skill|	skill := self basicNew.	skill setDefaults.	skill setDamage: 800.	skill setCooldownTurn: 8.	skill setManaUsage: 600.	^skill.! !Skill subclass: #FrostBite	instanceVariableNames: ''	classVariableNames: ''	poolDictionaries: ''	category: '2013400105'!"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!FrostBite class	instanceVariableNames: ''!!FrostBite class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 16:50'!new	|skill|	skill := self basicNew.	skill setDefaults.	skill setDamage: 300.	skill setCooldownTurn: 5.	skill setManaUsage: 150.	^skill.! !Skill subclass: #GodsStrength	instanceVariableNames: ''	classVariableNames: ''	poolDictionaries: ''	category: '2013400105'!"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!GodsStrength class	instanceVariableNames: ''!!GodsStrength class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/18/2017 22:52'!new	|skill|	skill := self basicNew.	skill setDefaults.	skill setDamageDoubleChange: 100 triple: 0 quad: 0.	skill setEffectTurn: 3.	skill setCooldownTurn: 5.	skill setManaUsage: 200.	^skill.! !Skill subclass: #Impale	instanceVariableNames: ''	classVariableNames: ''	poolDictionaries: ''	category: '2013400105'!"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!Impale class	instanceVariableNames: ''!!Impale class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 16:50'!new	|skill|	skill := self basicNew.	skill setDefaults.	skill setDamage: 260.	skill setCooldownTurn: 5.	skill setManaUsage: 225.	^skill.! !Skill subclass: #ManaBreak	instanceVariableNames: ''	classVariableNames: ''	poolDictionaries: ''	category: '2013400105'!"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!ManaBreak class	instanceVariableNames: ''!!ManaBreak class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 19:58'!new	|skill|	skill := self basicNew.	skill setDefaults.	skill setIsPassive: true.	skill setEnemyManaDescPerAttack: 100.	^skill.! !Skill subclass: #ManaBurn	instanceVariableNames: ''	classVariableNames: ''	poolDictionaries: ''	category: '2013400105'!"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!ManaBurn class	instanceVariableNames: ''!!ManaBurn class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 16:51'!new	|skill|	skill := self basicNew.	skill setDefaults.	skill setEnemyManaDescPerc: 20.	skill setCooldownTurn: 5.	skill setManaUsage: 50.	^skill.! !Skill subclass: #ManaVoid	instanceVariableNames: ''	classVariableNames: ''	poolDictionaries: ''	category: '2013400105'!"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!ManaVoid class	instanceVariableNames: ''!!ManaVoid class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 16:51'!new	|skill|	skill := self basicNew.	skill setDefaults.	skill setMissingManaToDamagePerc: 1.1.	skill setCooldownTurn: 7.	skill setManaUsage: 275.	^skill.! !Skill subclass: #Multicast	instanceVariableNames: ''	classVariableNames: ''	poolDictionaries: ''	category: '2013400105'!"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!Multicast class	instanceVariableNames: ''!!Multicast class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 19:15'!new	|skill|	skill := self basicNew.	skill setDefaults.	skill setIsPassive: true.	^skill.! !Skill subclass: #PulseNova	instanceVariableNames: ''	classVariableNames: ''	poolDictionaries: ''	category: '2013400105'!"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!PulseNova class	instanceVariableNames: ''!!PulseNova class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 19:41'!new	|skill|	skill := self basicNew.	skill setDefaults.	skill setManaUsageTurn: 150.	skill setSpellDamage: 50.	skill setEffectTurn: 999999.	^skill.! !Skill subclass: #Ravage	instanceVariableNames: ''	classVariableNames: ''	poolDictionaries: ''	category: '2013400105'!"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!Ravage class	instanceVariableNames: ''!!Ravage class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 16:51'!new	|skill|	skill := self basicNew.	skill setDefaults.	skill setDamage: 380.	skill setCooldownTurn: 8.	skill setManaUsage: 325.	^skill.! !Skill subclass: #SacredArrow	instanceVariableNames: ''	classVariableNames: ''	poolDictionaries: ''	category: '2013400105'!"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!SacredArrow class	instanceVariableNames: ''!!SacredArrow class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 16:51'!new	|skill|	skill := self basicNew.	skill setDefaults.	skill setDamage: 320.	skill setCooldownTurn: 3.	skill setChance: 75.	skill setManaUsage: 100.	^skill.! !Skill subclass: #SplitEarth	instanceVariableNames: ''	classVariableNames: ''	poolDictionaries: ''	category: '2013400105'!"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!SplitEarth class	instanceVariableNames: ''!!SplitEarth class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 16:51'!new	|skill|	skill := self basicNew.	skill setDefaults.	skill setDamage: 300.	skill setCooldownTurn: 5.	skill setManaUsage: 160.	^skill.! !Skill subclass: #Starstorm	instanceVariableNames: ''	classVariableNames: ''	poolDictionaries: ''	category: '2013400105'!"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!Starstorm class	instanceVariableNames: ''!!Starstorm class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 16:51'!new	|skill|	skill := self basicNew.	skill setDefaults.	skill setDamage: 300.	skill setCooldownTurn: 4.	skill setManaUsage: 160.	^skill.! !Skill subclass: #StormHammer	instanceVariableNames: ''	classVariableNames: ''	poolDictionaries: ''	category: '2013400105'!"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!StormHammer class	instanceVariableNames: ''!!StormHammer class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 16:51'!new	|skill|	skill := self basicNew.	skill setDefaults.	skill setDamage: 325.	skill setCooldownTurn: 5.	skill setManaUsage: 140.	^skill.! !Sentinel subclass: #Sven	instanceVariableNames: ''	classVariableNames: ''	poolDictionaries: ''	category: '2013400105'!"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!Sven class	instanceVariableNames: ''!!Sven class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 00:44'!new	|hero|	hero := self basicNew.	hero setDefaults.	hero setMaxHp: 2198.	hero setMaxMana: 874.	hero setHp: 2198.	hero setMana: 874.	hero setArmor: 14.	hero setMinDamage: 149 setMaxDamage: 151.	hero createInitialLists.	hero setSkill1: (StormHammer new) setSkill2: (GodsStrength new).	^hero.! !Scourge subclass: #Tidehunter	instanceVariableNames: ''	classVariableNames: ''	poolDictionaries: ''	category: '2013400105'!"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!Tidehunter class	instanceVariableNames: ''!!Tidehunter class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 00:42'!new	|hero|	hero := self basicNew.	hero setDefaults.	hero setMaxHp: 2316.	hero setMaxMana: 998.	hero setHp: 2316.	hero setMana: 998.	hero setArmor: 11.	hero setMinDamage: 139 setMaxDamage: 145.	hero createInitialLists.	hero setSkill1: (AnchorSmash new) setSkill2: (Ravage new).	^hero.! !Skill subclass: #VampiricAura	instanceVariableNames: ''	classVariableNames: ''	poolDictionaries: ''	category: '2013400105'!"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!VampiricAura class	instanceVariableNames: ''!!VampiricAura class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 16:51'!new	|skill|	skill := self basicNew.	skill setDefaults.	skill setIsPassive: true.	skill setHealsWithDamagePerc: 15.	^skill.! !Item subclass: #Vanguard	instanceVariableNames: ''	classVariableNames: ''	poolDictionaries: ''	category: '2013400105'!"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!Vanguard class	instanceVariableNames: ''!!Vanguard class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 10:36'!new	|item|	item := self basicNew.	item setDefaults.	item setCost: 2500.
-	item setWeight: 1.0.	item setMaxHpInc: 250.	item setDamageDesc60Chance: 20.	^item.! !Item subclass: #VitalyBooster	instanceVariableNames: ''	classVariableNames: ''	poolDictionaries: ''	category: '2013400105'!"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!VitalyBooster class	instanceVariableNames: ''!!VitalyBooster class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 10:37'!new	|item|	item := self basicNew.	item setDefaults.	item setCost: 1200.	item setWeight: 1.0.	item setMaxHpInc: 250.	^item.! !Skill subclass: #WraithfireBlast	instanceVariableNames: ''	classVariableNames: ''	poolDictionaries: ''	category: '2013400105'!"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!WraithfireBlast class	instanceVariableNames: ''!!WraithfireBlast class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 16:51'!new	|skill|	skill := self basicNew.	skill setDefaults.	skill setDamage: 300.	skill setCooldownTurn: 5.	skill setManaUsage: 140.	^skill.! !
+Object subclass: #Dota
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: '2013400105'!
+!Dota commentStamp: 'EnesCakir 5/20/2017 23:11' prior: 0!
+Mustafa Enes CAKIR
+2013400105
+CmpE260 Spring 2017
+Project 3 - Smalltalk!
+
+
+Dota subclass: #GameArena
+	instanceVariableNames: 'turn'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: '2013400105'!
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+GameArena class
+	instanceVariableNames: ''!
+
+!GameArena class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 22:00'!
+effectPassiveSkills: player
+	"Adds passive skills effects to hero"
+	|skill hero|
+	hero := player getHero.
+
+	"Check Skill 1"
+	skill := hero getSkill1.
+	skill getIsPassive = true
+		ifTrue:[
+			"Heals itself with the % of the given damage"
+			hero setHealsWithDamagePerc: ((hero getHealsWithDamagePerc) + (skill getHealsWithDamagePerc)).
+			"% chance of evasion"
+			hero setEvasionChance: ((hero getEvasionChance) + (skill getEvasionChance)).
+			"Decrease Enemy Mana per attack"
+			hero setEnemyManaDescPerAttack: ((hero getEnemyManaDescPerAttack) + (skill getEnemyManaDescPerAttack)).
+			"x2 Damage with % chance"
+			hero setDamageDoubleChance: ((hero getDamageDoubleChance ) + (skill getDamageDoubleChance)).
+			"x3 Damage with % chance"
+			hero setDamageTripleChance: ((hero getDamageTripleChance ) + (skill getDamageTripleChance)).
+			"x4 Damage with % chance"
+			hero setDamageQuadChance: ((hero getDamageQuadChance ) + (skill getDamageQuadChance)).
+		].
+
+	"Check Skill 2"
+	skill := hero getSkill2.
+	skill getIsPassive = true
+		ifTrue:[
+			hero setHealsWithDamagePerc: ((hero getHealsWithDamagePerc) + (skill getHealsWithDamagePerc)).
+			hero setEvasionChance: ((hero getEvasionChance) + (skill getEvasionChance)).
+			hero setEnemyManaDescPerAttack: ((hero getEnemyManaDescPerAttack) + (skill getEnemyManaDescPerAttack)).
+			hero setDamageDoubleChance: ((hero getDamageDoubleChance ) + (skill getDamageDoubleChance)).
+			hero setDamageTripleChance: ((hero getDamageTripleChance ) + (skill getDamageTripleChance)).
+			hero setDamageQuadChance: ((hero getDamageQuadChance ) + (skill getDamageQuadChance)).
+		].! !
+
+!GameArena class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 22:59'!
+playTurn: player vs: player2
+	"Gets action of a player for one turn"
+	|actionsList isTurnEnded hero hero2 attackButton hpButton manaButton skill1Button skill2Button chosenButton actualDamage effectiveSkills effectiveEnemySkills|
+	hero := player getHero.
+	hero2 := player2 getHero.
+	isTurnEnded := false.
+
+	"Apply passive effect for this turn"
+	self applyPassiveSkills: hero enemy: hero2.
+
+	"Creates buttons"
+	attackButton := 'Attack'.
+	hpButton := 'Use Health Potion'.
+	manaButton := 'Use Mana Potion'.
+	skill1Button := hero getSkill1 className.
+	skill2Button := hero getSkill2 className.
+
+	"Get effective skills of players"
+	effectiveSkills := hero getEffectiveSkills.
+	effectiveEnemySkills := hero2 getEffectiveSkills.
+
+	"All the time player has attack action"
+	actionsList := {attackButton}.
+	"If player has HP potion add button"
+	hero getHpPotions isEmpty
+	ifFalse: [ actionsList := actionsList, { hpButton }].
+	"If player has Mana potion add button"
+	hero getManaPotions isEmpty
+	ifFalse: [ actionsList := actionsList, { manaButton }].
+	"If first skill isn't passive and not in cooldown add button"
+	hero getSkill1 getIsPassive = false & hero getSkill1 getRemainingCooldownTurn = 0
+		ifTrue: [ actionsList := actionsList, { skill1Button }].
+	"If second skill isn't passive and not in cooldown add button"
+	hero getSkill2 getIsPassive = false & hero getSkill2 getRemainingCooldownTurn = 0
+		ifTrue: [ actionsList := actionsList, { skill2Button }].
+
+	"Apply effecctive skills"
+	effectiveSkills do: [ :skill |
+		"Pulse Nova mana check"
+		hero getMana >= skill getManaUsageTurn
+		ifTrue:[
+			hero setMana: (hero getMana) - (skill getManaUsageTurn).
+			hero2 setHp: ((hero2 getHp) - (skill getSpellDamage) ).
+		]
+		ifFalse:[
+			"Close Pulse Nova"
+			skill setRemainingEffectTurn: 0.
+		]
+	].
+
+	[isTurnEnded = false]
+	whileTrue: [
+		"Ask to player action"
+		chosenButton := actionsList at: (UIManager default chooseFrom: actionsList message: (player getName), ' turn (' , (player getHero) className, ')').
+
+		chosenButton = attackButton
+			ifTrue: [
+				"Calculate enemy evasion chance"
+				(self happenChance: (hero2 getEvasionChance)) = false
+				ifTrue: [
+					"Calculate RAW damage"
+					actualDamage := hero calculateDamage: (hero2 getArmor).
+					"Look damage multiply chance comes from Passive Skills and Items"
+					(self happenChance: (hero getDamageQuadChance)) = true
+					ifTrue: [ actualDamage := actualDamage * 4 ]
+					ifFalse: [
+						(self happenChance: (hero getDamageTripleChance)) = true
+							ifTrue: [ actualDamage := actualDamage * 3 ]
+							ifFalse: [
+								(self happenChance: (hero getDamageDoubleChance)) = true
+									ifTrue: [ actualDamage := actualDamage * 2 ].
+							].
+					].
+					"Vangaurd item effect"
+					(self happenChance: (hero2 getDamageDesc60Chance)) = true
+						ifTrue: [ actualDamage := actualDamage - 60 ].
+
+					"Anchor Smash effect"
+					effectiveEnemySkills do: [ :skill |
+						actualDamage := actualDamage * ((100 - (skill getEnemyAttackDescPerc)) / 100).
+					].
+
+					"Look damage multiply chance comes from Active Skills"
+					effectiveSkills do: [ :skill |
+						(self happenChance: (skill getDamageQuadChance)) = true
+							ifTrue: [ actualDamage := actualDamage * 4 ]
+							ifFalse: [
+								(self happenChance: (skill getDamageTripleChance)) = true
+									ifTrue: [ actualDamage := actualDamage * 3 ]
+									ifFalse: [
+										(self happenChance: (skill getDamageDoubleChance)) = true
+											ifTrue: [ actualDamage := actualDamage * 2 ].
+									].
+							].
+					].
+					"Set new enemy HP with Vampiric Aura effect"
+					hero2 setHp: ((hero2 getHp) - (actualDamage * (100 - (hero2 getHealsWithDamagePerc))/100 )).
+				].
+				"Mana Break effect"
+				hero2 setMana: ((hero2 getMana) - (hero getEnemyManaDescPerAttack)).
+				isTurnEnded := true.
+				player setLastAction: 'Attack'.
+			].
+		"Use HP potion"
+		chosenButton = hpButton
+			ifTrue: [
+				hero setHp: hero getHp + 300.
+				hero removeHpPotion.
+				isTurnEnded := true.
+				player setLastAction: 'HP Potion'.
+			].
+		"Use Mana potion"
+		chosenButton = manaButton
+			ifTrue: [
+				hero setMana: hero getMana + 300.
+				hero removeManaPotion.
+				isTurnEnded := true.
+				player setLastAction: 'Mana Potion'.
+			].
+		"Use Skill 1"
+		chosenButton = skill1Button
+			ifTrue: [
+				(hero getMana) >= ((hero getSkill1) getManaUsage)
+				ifTrue:[
+					self useSkill: player enemy: player2 skill: (hero getSkill1).
+					isTurnEnded := true.
+					player setLastAction: skill1Button.
+				]
+				ifFalse:[
+					Transcript cr; cr; show: (player getName); show: ' doesn''t have enough mana.'.
+				].
+
+			].
+		"Use Skill 2"
+		chosenButton = skill2Button
+			ifTrue: [
+				(hero getMana) >= ((hero getSkill2) getManaUsage)
+				ifTrue:[
+					self useSkill: player enemy: player2 skill: (hero getSkill2).
+					isTurnEnded := true.
+					player setLastAction: skill2Button.
+				]
+				ifFalse:[
+					Transcript cr; cr; show: (player getName); show: ' doesn''t have enough mana.'.
+				].
+			].
+	].
+
+
+	! !
+
+!GameArena class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 22:47'!
+marketForPlayer: player enemy: enemy maxCapacity: maxCapacity minCost: minCost
+	"All the market activies of given player"
+	|itemList chosenItem usedCapacity count countDict|
+	usedCapacity := 0.0.
+	itemList := Item subclasses.
+	"Keep item:count pair in the Dictionary"
+	countDict := Dictionary new.
+	itemList do:[ :item | countDict at: (item asString) put:0 .].
+
+	"Buy until money out or capacity out"
+	[((player getGold) >= minCost) & (usedCapacity < maxCapacity)]
+	whileTrue: [
+		"Ask to buy"
+		chosenItem := (itemList at:(UIManager default
+			chooseFrom: itemList
+			message: 'Choose an Item for ', player getName,
+				' (Remaining item slot = ', (maxCapacity - usedCapacity) asString,
+				', Remaining gold = ', (player getGold) asString, ')'))
+			new.
+
+		"Not enough money"
+		player getGold < chosenItem getCost
+		ifTrue: [
+			Transcript cr;show:(player getName ); show: ' can''t afford '; show: chosenItem;
+				cr; show: 'It''s '; show:(chosenItem getCost); show:' golds and ';
+					show:(player getName ); show:' has just '; show: player getGold; show:' golds'.
+		]
+		ifFalse: [
+			"Not enough capacity"
+			(usedCapacity) + (chosenItem getWeight) > maxCapacity
+			ifTrue: [
+				Transcript cr;show: chosenItem; show: ' is too heavy.';
+					cr; show:(player getName ); show:' has '; show:(maxCapacity - usedCapacity); show:' empty slots.'.
+			]
+			ifFalse:[
+				"Increase count"
+				count := (countDict at: (chosenItem className)).
+				countDict at: (chosenItem className) put: (count + 1).
+				"Buy item"
+				self buyItem: chosenItem player: player enemy: enemy count: (countDict at: (chosenItem className)).
+			].
+		].
+		usedCapacity := ((player getHero) calculateWeight).
+	].! !
+
+!GameArena class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 21:51'!
+start
+	"This method is the main of the game. The hero selection, buying items etc. and the turn-based game is implemented in this method."
+	|scourgeList sentinelList chosenHero player1 player2 minCost maxCapacity initialGold winner|
+
+	"Game global variables"
+	initialGold := 11000.
+	minCost := 200.
+	maxCapacity := 4.
+
+	"Open new Transcript"
+	Transcript  open; clear.
+
+	"Choose a Scourge hero and create Player 1"
+	scourgeList := Scourge subclasses.
+	chosenHero := (scourgeList at: (UIManager default chooseFrom: scourgeList message: 'Choose a hero from Scourge list for Player 1')) new.
+	player1 := Player newPlayer: 'Player 1' faction: Scourge choosenHero: chosenHero initialGold: initialGold.
+
+	"Choose a Sentinel hero and create Player 2"
+	sentinelList := Sentinel subclasses.
+	chosenHero := (sentinelList at: (UIManager default chooseFrom: sentinelList message: 'Choose a hero from Sentinel list for Player 2')) new.
+	player2 := Player newPlayer: 'Player 2' faction: Sentinel choosenHero: chosenHero initialGold: initialGold.
+
+	"Add Passive Skill effect to players"
+	self effectPassiveSkills: player1.
+	self effectPassiveSkills: player2.
+
+	"Buy some items for Player 1"
+	self marketForPlayer: player1 enemy: player2 maxCapacity: maxCapacity  minCost: minCost.
+
+	"Buy some items for Player 2"
+	self marketForPlayer: player2 enemy: player1 maxCapacity: maxCapacity  minCost: minCost.
+
+	"So far, we have chosen our heroes and buy items for them, now it is turn to play the game"
+	Transcript cr; show: '==== The game is started ===='.
+
+	"Loop until one of the player is dead"
+	[(player1 isDead = false) & ( player2 isDead = false)]
+	whileTrue: [
+		"Prints current status"
+		Transcript cr; cr; show:'==== '; show: player1 getName; show: '''s turn!! ===='.
+		player1 printStatus.
+		player2 printStatus.
+
+		"Player 1 plays turn"
+		self playTurn: player1 vs: player2.
+
+		"Reduce remaining skill countdown turns for Player 1"
+		self reduceCooldowns: player1.
+		self reduceEffectTurns: player1.
+
+		"If Player 2 isn't dead after Player 1 attack, it play its turn"
+		player2 isDead = false
+			ifTrue: [
+				Transcript cr; cr; show:'==== '; show: player2 getName; show: '''s turn!! ===='.
+				player1 printStatus.
+				player2 printStatus.
+				self playTurn: player2 vs: player1.
+			].
+		self reduceCooldowns: player2.
+		self reduceEffectTurns: player2.
+
+	].
+
+	"If HP of an hero reaches to zero, the game ends as it goes out of the loop".
+	Transcript cr; cr;show:'==== The game is finished ===='.
+	player1 printStatus.
+	player2 printStatus.
+
+	"Deciding winner."
+	player1 isDead = false
+		ifTrue: [ winner := player1]
+		ifFalse: [ winner := player2].
+	Transcript cr; cr; show: '==== '; show: winner getName; show: ' ('; show: winner getHero className; show:') is the winner of the game ===='.
+	! !
+
+!GameArena class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 21:53'!
+applyPassiveSkills: hero enemy: enemy
+	"Apply passive effects to hero"
+	"+ Mana at each turn"
+	hero setMana: hero getMana + hero getManaIncTurn.
+	"Heals itself with the 15% of the given damage"
+	hero setHp: (hero getHp) * ((hero getHpIncPercTurn + 100) / 100).! !
+
+!GameArena class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 23:01'!
+reduceCooldowns: player
+	"Reduces remaining cooldown of used skills"
+	|skill|
+	skill := (player getHero) getSkill1.
+	skill getRemainingCooldownTurn ~= 0
+		ifTrue:[skill setRemainingCooldownTurn: (skill getRemainingCooldownTurn - 1)].
+
+	skill := (player getHero) getSkill2.
+	skill getRemainingCooldownTurn ~= 0
+		ifTrue:[skill setRemainingCooldownTurn: (skill getRemainingCooldownTurn - 1)].! !
+
+!GameArena class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 22:00'!
+happenChance: perc
+	"Calculates chance to happen given percantage"
+	|chance|
+	chance := (1 to: 100) atRandom.
+	chance <= perc
+		ifTrue: [ ^true ]
+		ifFalse: [ ^false ].! !
+
+!GameArena class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 23:05'!
+useSkill: player enemy: enemy skill: skill
+	"Effect given skill on enemy hero"
+	|hero enemyHero skillDamage|
+	hero := player getHero.
+	enemyHero := enemy getHero.
+
+	"Descrease mana usage"
+	hero setMana: ((hero getMana) - (skill getManaUsage)).
+
+	"Activate skills"
+	"It's adding +1 because their effect starts next turn"
+	skill setRemainingCooldownTurn: ((skill getCooldownTurn) + 1).
+	skill setRemainingEffectTurn: ((skill getEffectTurn) + 1).
+
+	"Calculate skill happen chance"
+	(self happenChance: (skill getChance)) = true
+		ifTrue: [
+			"Calculate skill damage"
+			"% (enemy missing mana) as Damage AND Hood of Defance effect"
+			skillDamage := ((skill getDamage) + ((skill getMissingManaToDamagePerc) * (enemyHero getMaxMana - enemyHero getMana)))
+				* ((100 - enemyHero getSkillDamageDescPerc) / 100).
+			enemyHero setHp: ((enemyHero getHp) - skillDamage).
+			"Mana Burn effect"
+			enemyHero setMana: ((enemyHero getMana) * ((100 - skill getEnemyManaDescPerc) / 100)).
+		].! !
+
+!GameArena class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 21:58'!
+buyItem: item player: player enemy: enemy count: count
+	"Adds item to hero bag, and add effects to hero"
+	|hero|
+	hero := player getHero.
+	player setGold: (player getGold) - (item getCost).
+
+	"EFFECTS"
+	"+ Damage"
+	hero setMinDamage: ((hero getMinDamage) + (item getDamage))
+		setMaxDamage: ((hero getMaxDamage) + (item getDamage)).
+	"+ Max HP"
+	hero setMaxHp: (hero getMaxHp + item getMaxHpInc).
+	hero setHp: (hero getMaxHp).
+	"+ Max Mana"
+	hero setMaxMana: (hero getMaxMana + item getMaxManaInc).
+	hero setMana: (hero getMaxMana).
+	"+ Mana at each turn"
+	hero setManaIncTurn:  (hero getManaIncTurn + item getManaIncTurn).
+	"Decrease % of the skill damage taken"
+	hero setSkillDamageDescPerc:  (hero getSkillDamageDescPerc + (item getSkillDamageDescPerc / count)).
+	"+ % evasion"
+	hero setEvasionChance: (hero getEvasionChance + (item getEvasionChance / count)).
+	"% chance of x2 damage"
+	hero setDamageDoubleChance: (hero getDamageDoubleChance + (item getDamageDoubleChance / count)).
+	"Decrease enemy armor (only once)"
+	(enemy getHero) setArmor: (enemy getHero) getArmor - item getEnemyArmorDesc.
+	"% chance of decreasing the received damage by 60"
+	hero setDamageDesc60Chance: (hero getDamageDesc60Chance + (item getDamageDesc60Chance / count)).
+	"Increase current HP by % at each turn"
+	hero setHpIncPercTurn:  (hero getHpIncPercTurn + item getHpIncPercTurn).
+
+	"Add item to hero's item list"
+	hero addItem: item.! !
+
+!GameArena class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 23:01'!
+reduceEffectTurns: player
+	"Reduces remaining effective turn of used skills"
+	|skill|
+	skill := (player getHero) getSkill1.
+	skill getRemainingEffectTurn ~= 0
+		ifTrue:[skill setRemainingEffectTurn: (skill getRemainingEffectTurn - 1)].
+
+	skill := (player getHero) getSkill2.
+	skill getRemainingEffectTurn ~= 0
+		ifTrue:[skill setRemainingEffectTurn: (skill getRemainingEffectTurn - 1)].! !
+
+
+Dota subclass: #Hero
+	instanceVariableNames: 'hp maxHp mana maxMana skill1 skill2 armor minDamage maxDamage items manaPotions hpPotions manaIncTurn manaDescTurn skillDamageDescPerc evasionChance damageDescChance hpIncTurnPerc damageDoubleChance damageTripleChance damageQuadChance hpIncPercTurn healsWithDamagePerc enemyManaDescPerAttack damageDesc60Chance'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: '2013400105'!
+
+!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 00:51'!
+setMana: initial
+	mana := ((initial max: 0) min: maxMana) rounded.! !
+
+!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 4/28/2017 15:38'!
+getDamage
+	^minDamage + '-' + maxDamage.! !
+
+!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/18/2017 20:54'!
+setSkill1: s1 setSkill2: s2
+	skill1 := s1.
+	skill2 := s2.! !
+
+!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 4/28/2017 15:37'!
+getMaxDamage
+	^maxDamage.! !
+
+!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 19:30'!
+setManaDescTurn: initial
+	manaDescTurn := initial.! !
+
+!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 4/28/2017 17:17'!
+setMaxMana: initial
+	maxMana := initial.! !
+
+!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/18/2017 19:17'!
+getCoolDownSkills
+	|coolDownSkills|
+	coolDownSkills := #().
+	skill1 getRemainingCooldownTurn ~= 0
+	ifTrue:[coolDownSkills := coolDownSkills , {skill1}.].
+
+	skill2 getRemainingCooldownTurn ~= 0
+	ifTrue:[coolDownSkills := coolDownSkills , {skill2}.].
+
+	^coolDownSkills.! !
+
+!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 23:09'!
+calculateWeight
+	"Calculates used slot capacity"
+	^(((manaPotions size) + (hpPotions size)) * 0.5) + ((items size) * 1.0).! !
+
+!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 00:41'!
+getItems
+	^items.! !
+
+!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 23:08'!
+addItem: item
+	"Adds item to hero's item lists"
+	item getIsHpPotion = true
+		ifTrue: [hpPotions add: item.].
+	item getIsManaPotion = true
+		ifTrue: [manaPotions add: item.].
+	(item getIsHpPotion) = true | (item getIsManaPotion) = true
+		ifFalse: [items add: item.].! !
+
+!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/18/2017 23:07'!
+setDamageTripleChance: initial
+	damageTripleChance := initial.! !
+
+!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 4/28/2017 17:31'!
+setMinDamage: min setMaxDamage: max
+	minDamage := min.
+	maxDamage := max.! !
+
+!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 4/28/2017 15:35'!
+getSkill2
+	^skill2.! !
+
+!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 19:28'!
+getManaIncTurn
+	^manaIncTurn.! !
+
+!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 17:04'!
+removeManaPotion
+	manaPotions remove: (manaPotions at: 1).! !
+
+!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 4/28/2017 17:13'!
+getHp
+	^hp.
+! !
+
+!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 4/28/2017 15:35'!
+getSkill1
+	^skill1.! !
+
+!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 23:09'!
+removeHpPotion
+	hpPotions remove: (hpPotions at: 1).! !
+
+!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/18/2017 23:07'!
+getDamageQuadChance
+	^damageQuadChance.! !
+
+!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 4/28/2017 17:15'!
+getMaxHp
+	^maxHp.
+! !
+
+!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 4/28/2017 15:41'!
+setArmor: initial
+	armor := initial.! !
+
+!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 00:41'!
+getManaPotions
+	^manaPotions.! !
+
+!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 17:18'!
+createInitialLists
+	items := LinkedList new.
+	manaPotions := LinkedList new.
+	hpPotions := LinkedList new.! !
+
+!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 4/28/2017 17:16'!
+setMaxHp: initial
+	maxHp := initial.! !
+
+!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 19:29'!
+getHpIncTurnPerc
+	^hpIncTurnPerc.! !
+
+!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 10:06'!
+setDamageDesc60Chance: initial
+	damageDesc60Chance := initial.! !
+
+!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 19:29'!
+getEvasionChance
+	^evasionChance.! !
+
+!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 4/28/2017 15:35'!
+getMana
+	^mana.! !
+
+!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 10:06'!
+setHpIncPercTurn: initial
+	hpIncPercTurn := initial.! !
+
+!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 19:30'!
+setHpIncTurnPerc: initial
+	hpIncTurnPerc := initial.! !
+
+!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 19:29'!
+getDamageDescChance
+	^damageDescChance.! !
+
+!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 00:51'!
+setHp: initial
+	hp := ((initial max: 0) min: maxHp) rounded.! !
+
+!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 4/28/2017 15:37'!
+getArmor
+	^armor.! !
+
+!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 22:17'!
+setDefaults
+	self setManaIncTurn: 0.
+	self setManaDescTurn: 0.
+	self setSkillDamageDescPerc: 0.
+	self setEvasionChance: 0.
+	self setDamageDoubleChance: 0.
+	self setDamageTripleChance: 0.
+	self setDamageQuadChance: 0.
+	self setDamageDescChance: 0.
+	self setHpIncPercTurn: 0.
+	self setHealsWithDamagePerc: 0.
+	self setEnemyManaDescPerAttack: 0.
+	self setDamageDesc60Chance: 0.! !
+
+!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 00:41'!
+getHpPotions
+	^hpPotions.! !
+
+!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 15:32'!
+setHealsWithDamagePerc: initial
+	healsWithDamagePerc := initial.! !
+
+!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 19:29'!
+setManaIncTurn: initial
+	manaIncTurn := initial.! !
+
+!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 15:27'!
+getEnemyManaDescPerAttack
+	^enemyManaDescPerAttack.! !
+
+!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 23:09'!
+calculateDamage: enemyArmor
+	"Calculates actual damage for attack"
+	|actualDamage givenDamage|
+	givenDamage := (minDamage to: maxDamage) atRandom.
+	actualDamage := givenDamage * (1 - ((0.06 * enemyArmor/(1.0 + (0.06 * enemyArmor))))).
+	^actualDamage rounded.! !
+
+!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 19:29'!
+getDamageDoubleChance
+	^damageDoubleChance.! !
+
+!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 10:05'!
+getHpIncPercTurn
+	^hpIncPercTurn.! !
+
+!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 19:30'!
+setSkillDamageDescPerc: initial
+	skillDamageDescPerc := initial.! !
+
+!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 10:05'!
+getDamageDesc60Chance
+	^damageDesc60Chance.! !
+
+!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 4/28/2017 15:35'!
+getSkills
+	^skill1, skill2.! !
+
+!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/18/2017 23:07'!
+setDamageQuadChance: initial
+	damageQuadChance := initial.! !
+
+!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 19:30'!
+setEvasionChance: initial
+	evasionChance := initial.! !
+
+!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 22:55'!
+getEffectiveSkills
+	|effectiveSkills|
+	effectiveSkills := #().
+	skill1 getRemainingEffectTurn ~= 0
+	ifTrue:[effectiveSkills := effectiveSkills , {skill1}.].
+
+	skill2 getRemainingEffectTurn ~= 0
+	ifTrue:[effectiveSkills := effectiveSkills , {skill2}.].
+
+	^effectiveSkills.! !
+
+!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 4/28/2017 15:37'!
+getMinDamage
+	^minDamage.! !
+
+!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 15:26'!
+getHealsWithDamagePerc
+	^healsWithDamagePerc.! !
+
+!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 19:28'!
+getManaDescTurn
+	^manaDescTurn.! !
+
+!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 19:28'!
+getSkillDamageDescPerc
+	^skillDamageDescPerc.! !
+
+!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 19:30'!
+setDamageDoubleChance: initial
+	damageDoubleChance := initial.! !
+
+!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 4/28/2017 17:15'!
+getMaxMana
+	^maxMana.
+! !
+
+!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 15:33'!
+setEnemyManaDescPerAttack: initial
+	enemyManaDescPerAttack := initial.! !
+
+!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/18/2017 23:07'!
+getDamageTripleChance
+	^damageTripleChance.! !
+
+!Hero methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 19:30'!
+setDamageDescChance: initial
+	damageDescChance := initial.! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+Hero class
+	instanceVariableNames: ''!
+
+!Hero class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 4/28/2017 15:49'!
+new
+	^self subclassResponsibility.! !
+
+
+Dota subclass: #Item
+	instanceVariableNames: 'cost isHpPotion isManaPotion weight damage skillDamageDescPerc manaIncTurn maxHpInc maxManaInc evasionChance damageDoubleChance enemyArmorDesc hpIncPercTurn damageDesc60Chance'
+	classVariableNames: 'totalCount'
+	poolDictionaries: ''
+	category: '2013400105'!
+
+!Item methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 10:05'!
+getHpIncPercTurn
+	^hpIncPercTurn.! !
+
+!Item methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 10:05'!
+setSkillDamageDescPerc: initial
+	skillDamageDescPerc := initial.! !
+
+!Item methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 12:41'!
+getTotalCount
+	^totalCount.! !
+
+!Item methodsFor: 'as yet unclassified' stamp: 'EnesCakir 4/28/2017 17:59'!
+getCost
+	^cost.! !
+
+!Item methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 18:21'!
+incTotalCount
+	totalCount := totalCount + 1! !
+
+!Item methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 10:03'!
+getSkillDamageDescPerc
+	^skillDamageDescPerc.! !
+
+!Item methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/16/2017 18:43'!
+getIsHpPotion
+	^isHpPotion.! !
+
+!Item methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 22:17'!
+setDefaults
+	self setDamage: 0.
+	self setSkillDamageDescPerc: 0.
+	self setManaIncTurn: 0.
+	self setMaxHpInc: 0.
+	self setMaxManaInc: 0.
+	self setEvasionChance: 0.
+	self setDamageDoubleChance: 0.
+	self setEnemyArmorDesc: 0.
+	self setHpIncPercTurn: 0.
+	self setDamageDesc60Chance: 0.! !
+
+!Item methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 10:05'!
+getDamageDesc60Chance
+	^damageDesc60Chance.! !
+
+!Item methodsFor: 'as yet unclassified' stamp: 'EnesCakir 4/28/2017 18:01'!
+setCost: initial
+	cost := initial.! !
+
+!Item methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 10:04'!
+getEvasionChance
+	^evasionChance.! !
+
+!Item methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/16/2017 18:44'!
+getIsManaPotion
+	^isManaPotion.! !
+
+!Item methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 10:04'!
+getMaxManaInc
+	^maxManaInc.! !
+
+!Item methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 10:04'!
+getDamageDoubleChance
+	^damageDoubleChance.! !
+
+!Item methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/16/2017 18:44'!
+setIsHpPotion: initial
+	isHpPotion := initial.! !
+
+!Item methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 10:04'!
+getMaxHpInc
+	^maxHpInc.! !
+
+!Item methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 10:06'!
+setMaxManaInc: initial
+	maxManaInc := initial.! !
+
+!Item methodsFor: 'as yet unclassified' stamp: 'EnesCakir 4/28/2017 18:02'!
+setDamage: initial
+	damage := initial.! !
+
+!Item methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 10:06'!
+setEvasionChance: initial
+	evasionChance := initial.! !
+
+!Item methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 10:06'!
+setHpIncPercTurn: initial
+	hpIncPercTurn := initial.! !
+
+!Item methodsFor: 'as yet unclassified' stamp: 'EnesCakir 4/28/2017 18:04'!
+setWeight: initial
+	weight := initial.! !
+
+!Item methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/18/2017 23:29'!
+setTotalCount: initial
+	totalCount := initial.! !
+
+!Item methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 10:06'!
+setDamageDoubleChance: initial
+	damageDoubleChance := initial.! !
+
+!Item methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 10:05'!
+setManaIncTurn: initial
+	manaIncTurn := initial.! !
+
+!Item methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 10:06'!
+setEnemyArmorDesc: initial
+	enemyArmorDesc := initial.! !
+
+!Item methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 10:04'!
+getEnemyArmorDesc
+	^enemyArmorDesc.! !
+
+!Item methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/18/2017 23:30'!
+descTotalCount
+	totalCount := totalCount - 1.! !
+
+!Item methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 10:05'!
+setMaxHpInc: initial
+	maxHpInc := initial.! !
+
+!Item methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 10:06'!
+setDamageDesc60Chance: initial
+	damageDesc60Chance := initial.! !
+
+!Item methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 10:04'!
+getManaIncTurn
+	^manaIncTurn.! !
+
+!Item methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/16/2017 18:44'!
+setIsManaPotion: initial
+	isManaPotion := initial.! !
+
+!Item methodsFor: 'as yet unclassified' stamp: 'EnesCakir 4/28/2017 18:01'!
+getWeight
+	^weight.! !
+
+!Item methodsFor: 'as yet unclassified' stamp: 'EnesCakir 4/28/2017 18:00'!
+getDamage
+	^damage.! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+Item class
+	instanceVariableNames: ''!
+
+!Item class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 4/28/2017 15:49'!
+new
+	^self subclassResponsibility.! !
+
+
+Item subclass: #BattleFury
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: '2013400105'!
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+BattleFury class
+	instanceVariableNames: ''!
+
+!BattleFury class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 10:20'!
+new
+	|item|
+	item := self basicNew.
+	item setDefaults.
+	item setCost: 4500.
+	item setWeight: 1.0.
+	item setDamage: 55.
+	item setManaIncTurn: 50.
+	^item.! !
+
+
+Item subclass: #Butterfly
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: '2013400105'!
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+Butterfly class
+	instanceVariableNames: ''!
+
+!Butterfly class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 10:21'!
+new
+	|item|
+	item := self basicNew.
+	item setDefaults.
+	item setCost: 5500.
+	item setWeight: 1.0.
+	item setDamage: 30.
+	item setEvasionChance: 25.
+	^item.! !
+
+
+Item subclass: #Daedalus
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: '2013400105'!
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+Daedalus class
+	instanceVariableNames: ''!
+
+!Daedalus class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 10:21'!
+new
+	|item|
+	item := self basicNew.
+	item setDefaults.
+	item setCost: 5500.
+	item setWeight: 1.0.
+	item setDamage: 75.
+	item setDamageDoubleChance: 25.
+	^item.! !
+
+
+Item subclass: #Desolator
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: '2013400105'!
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+Desolator class
+	instanceVariableNames: ''!
+
+!Desolator class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 10:22'!
+new
+	|item|
+	item := self basicNew.
+	item setDefaults.
+	item setCost: 4000.
+	item setWeight: 1.0.
+	item setDamage: 50.
+	item setEnemyArmorDesc: 5.
+	^item.! !
+
+
+Item subclass: #EnergyBooster
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: '2013400105'!
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+EnergyBooster class
+	instanceVariableNames: ''!
+
+!EnergyBooster class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 10:22'!
+new
+	|item|
+	item := self basicNew.
+	item setDefaults.
+	item setCost: 1100.
+	item setWeight: 1.0.
+	item setMaxManaInc: 250.
+	^item.! !
+
+
+Item subclass: #HealthPotion
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: '2013400105'!
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+HealthPotion class
+	instanceVariableNames: ''!
+
+!HealthPotion class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 10:11'!
+new
+	|item|
+	item := self basicNew.
+	item setDefaults.
+	item setCost: 200.
+	item setWeight: 0.5.
+	item setIsHpPotion: true.
+	^item.! !
+
+
+Item subclass: #HeartOfTarrasque
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: '2013400105'!
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+HeartOfTarrasque class
+	instanceVariableNames: ''!
+
+!HeartOfTarrasque class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 10:23'!
+new
+	|item|
+	item := self basicNew.
+	item setDefaults.
+	item setCost: 5600.
+	item setWeight: 1.0.
+	item setMaxHpInc: 250.
+	item setHpIncPercTurn: 7.
+	^item.! !
+
+
+Item subclass: #HoodOfDefiance
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: '2013400105'!
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+HoodOfDefiance class
+	instanceVariableNames: ''!
+
+!HoodOfDefiance class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 10:23'!
+new
+	|item|
+	item := self basicNew.
+	item setDefaults.
+	item setCost: 2000.
+	item setWeight: 1.0.
+	item setSkillDamageDescPerc: 25.
+	^item.! !
+
+
+Item subclass: #ManaPotion
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: '2013400105'!
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+ManaPotion class
+	instanceVariableNames: ''!
+
+!ManaPotion class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 10:11'!
+new
+	|item|
+	item := self basicNew.
+	item setDefaults.
+	item setCost: 200.
+	item setWeight: 0.5.
+	item setIsManaPotion: true.
+	^item.! !
+
+
+Dota subclass: #Player
+	instanceVariableNames: 'faction name hero gold lastAction'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: '2013400105'!
+
+!Player methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 14:11'!
+setLastAction: initial
+	lastAction := initial.! !
+
+!Player methodsFor: 'as yet unclassified' stamp: 'EnesCakir 4/28/2017 22:39'!
+setFaction: initial
+	faction := initial.! !
+
+!Player methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 00:06'!
+setName: initial
+	name := initial.! !
+
+!Player methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 00:06'!
+getName
+	^name.! !
+
+!Player methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 23:07'!
+getFaction
+	"Return faction of hero. For just best practice"
+	^faction.! !
+
+!Player methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 23:06'!
+isDead
+	"Checks player's hero is dead or not"
+	(self getHero) getHp = 0
+	ifTrue: [ ^true. ]
+	ifFalse: [ ^false. ].
+! !
+
+!Player methodsFor: 'as yet unclassified' stamp: 'EnesCakir 4/28/2017 22:38'!
+getGold
+	^gold.! !
+
+!Player methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 23:07'!
+printStatus
+	"Prints current status of player"
+	Transcript cr;
+		cr; show: self getName;
+		cr; show: 'Hero: '; show: self getHero className;
+		cr; show: self getHero getHp; show: ' / '; show: self getHero getMaxHp; show: ' HP';
+		cr; show: self getHero getMana; show: ' / '; show: self getHero getMaxMana; show: ' Mana';
+		cr; show: 'Last Action: '; show: self getLastAction;
+		cr; show: 'Remaining Potions: '.
+	((hero getHpPotions) isEmpty) & ((hero getManaPotions) isEmpty)
+		ifTrue: [ Transcript show: 'None'. ]
+		ifFalse: [
+			(hero getHpPotions isEmpty)
+				ifTrue:[ Transcript show: (hero getManaPotions) size ; show: ' Mana'. ]
+				ifFalse:[
+					(hero getManaPotions isEmpty)
+						ifTrue:[ Transcript show: (hero getHpPotions) size ; show: ' Health'. ]
+						ifFalse:[
+							Transcript show: (hero getHpPotions) size ; show: ' Health, '; show: (hero getManaPotions) size ; show: ' Mana'.
+						].
+				].
+		].
+	Transcript cr; show: 'Skills in Cooldown: '.
+	((hero getCoolDownSkills) isEmpty)
+		ifTrue: [ Transcript show: 'None'. ]
+		ifFalse: [
+			(hero getCoolDownSkills) do: [ :skill |
+				Transcript show: (skill className); show:' (not available for '; show:(skill getRemainingCooldownTurn) asString; show: ' turns) '.
+			].
+		].
+	Transcript cr; show: 'Effective Active Skills: '.
+	((hero getEffectiveSkills) isEmpty)
+		ifTrue: [ Transcript show: 'None'. ]
+		ifFalse: [
+			(hero getEffectiveSkills) do: [ :skill |
+				Transcript show: (skill className); show:' (is effective for '; show:(skill getRemainingEffectTurn ) asString; show: ' turns) '.
+			].
+		].! !
+
+!Player methodsFor: 'as yet unclassified' stamp: 'EnesCakir 4/28/2017 22:39'!
+setHero: initial
+	hero := initial.! !
+
+!Player methodsFor: 'as yet unclassified' stamp: 'EnesCakir 4/28/2017 22:38'!
+getHero
+	^hero.! !
+
+!Player methodsFor: 'as yet unclassified' stamp: 'EnesCakir 4/28/2017 22:39'!
+setGold: initial
+	gold := initial.! !
+
+!Player methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 14:11'!
+getLastAction
+	^lastAction.! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+Player class
+	instanceVariableNames: ''!
+
+!Player class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 14:26'!
+newPlayer: username faction: faction choosenHero: hero initialGold: gold
+	|player|
+	player := self basicNew.
+	player setFaction: faction.
+	player setHero: hero.
+	player setGold: gold.
+	player setName: username.
+	player setLastAction: 'Not played yet'.
+	^player.! !
+
+
+Hero subclass: #Scourge
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: '2013400105'!
+
+Scourge subclass: #Leshrac
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: '2013400105'!
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+Leshrac class
+	instanceVariableNames: ''!
+
+!Leshrac class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 00:41'!
+new
+	|hero|
+	hero := self basicNew.
+	hero setDefaults.
+	hero setMaxHp: 1518.
+	hero setMaxMana: 1534.
+	hero setHp: 1518.
+	hero setMana: 1534.
+	hero setArmor: 12.
+	hero setMinDamage: 133 setMaxDamage: 137.
+	hero createInitialLists.
+	hero setSkill1: (SplitEarth new) setSkill2: (PulseNova new).
+	^hero.! !
+
+
+Scourge subclass: #Lion
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: '2013400105'!
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+Lion class
+	instanceVariableNames: ''!
+
+!Lion class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 00:41'!
+new
+	|hero|
+	hero := self basicNew.
+	hero setDefaults.
+	hero setMaxHp: 1609.
+	hero setMaxMana: 1456.
+	hero setHp: 1609.
+	hero setMana: 1456.
+	hero setArmor: 9.
+	hero setMinDamage: 139 setMaxDamage: 145.
+	hero createInitialLists.
+	hero setSkill1: (EarthSpike new) setSkill2: (FingerOfDeath new).
+	^hero.! !
+
+
+Scourge subclass: #Mortred
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: '2013400105'!
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+Mortred class
+	instanceVariableNames: ''!
+
+!Mortred class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 00:41'!
+new
+	|hero|
+	hero := self basicNew.
+	hero setDefaults.
+	hero setMaxHp: 1754.
+	hero setMaxMana: 892.
+	hero setHp: 1754.
+	hero setMana: 892.
+	hero setArmor: 18.
+	hero setMinDamage: 142 setMaxDamage: 144.
+	hero createInitialLists.
+	hero setSkill1: (Blur new) setSkill2: (CoupDeGrace new).
+	^hero.! !
+
+
+Scourge subclass: #NyxAssassin
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: '2013400105'!
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+NyxAssassin class
+	instanceVariableNames: ''!
+
+!NyxAssassin class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 00:42'!
+new
+	|hero|
+	hero := self basicNew.
+	hero setDefaults.
+	hero setMaxHp: 1784.
+	hero setMaxMana: 1149.
+	hero setHp: 1784.
+	hero setMana: 1149.
+	hero setArmor: 14.
+	hero setMinDamage: 122 setMaxDamage: 126.
+	hero createInitialLists.
+	hero setSkill1: (Impale new) setSkill2: (ManaBurn new).
+	^hero.! !
+
+
+Hero subclass: #Sentinel
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: '2013400105'!
+
+Sentinel subclass: #Earthshaker
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: '2013400105'!
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+Earthshaker class
+	instanceVariableNames: ''!
+
+!Earthshaker class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 00:42'!
+new
+	|hero|
+	hero := self basicNew.
+	hero setDefaults.
+	hero setMaxHp: 2270.
+	hero setMaxMana: 1030.
+	hero setHp: 2270.
+	hero setMana: 1030.
+	hero setArmor: 10.
+	hero setMinDamage: 136 setMaxDamage: 146.
+	hero createInitialLists.
+	hero setSkill1: (Fissure new) setSkill2: (EnchantTotem new).
+	^hero.! !
+
+
+Sentinel subclass: #Magina
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: '2013400105'!
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+Magina class
+	instanceVariableNames: ''!
+
+!Magina class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 00:42'!
+new
+	|hero|
+	hero := self basicNew.
+	hero setDefaults.
+	hero setMaxHp: 1495.
+	hero setMaxMana: 1017.
+	hero setHp: 1495.
+	hero setMana: 1017.
+	hero setArmor: 14.
+	hero setMinDamage: 136 setMaxDamage: 140.
+	hero createInitialLists.
+	hero setSkill1: (ManaBreak new) setSkill2: (ManaVoid new).
+	^hero.! !
+
+
+Sentinel subclass: #Mirana
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: '2013400105'!
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+Mirana class
+	instanceVariableNames: ''!
+
+!Mirana class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 00:43'!
+new
+	|hero|
+	hero := self basicNew.
+	hero setDefaults.
+	hero setMaxHp: 1697.
+	hero setMaxMana: 996.
+	hero setHp: 1697.
+	hero setMana: 996.
+	hero setArmor: 16.
+	hero setMinDamage: 137 setMaxDamage: 148.
+	hero createInitialLists.
+	hero setSkill1: (Starstorm new) setSkill2: (SacredArrow new).
+	^hero.! !
+
+
+Sentinel subclass: #OgreMagi
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: '2013400105'!
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+OgreMagi class
+	instanceVariableNames: ''!
+
+!OgreMagi class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 00:43'!
+new
+	|hero|
+	hero := self basicNew.
+	hero setDefaults.
+	hero setMaxHp: 2426.
+	hero setMaxMana: 1105.
+	hero setHp: 2426.
+	hero setMana: 1105.
+	hero setArmor: 16.
+	hero setMinDamage: 126 setMaxDamage: 132.
+	hero createInitialLists.
+	hero setSkill1: (Fireblast new) setSkill2: (Multicast new).
+	^hero.! !
+
+
+Sentinel subclass: #Rylai
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: '2013400105'!
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+Rylai class
+	instanceVariableNames: ''!
+
+!Rylai class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 00:43'!
+new
+	|hero|
+	hero := self basicNew.
+	hero setDefaults.
+	hero setMaxHp: 1609.
+	hero setMaxMana: 1373.
+	hero setHp: 1609.
+	hero setMana: 1373.
+	hero setArmor: 9.
+	hero setMinDamage: 125 setMaxDamage: 131.
+	hero createInitialLists.
+	hero setSkill1: (FrostBite new) setSkill2: (FreezingField new).
+	^hero.! !
+
+
+Scourge subclass: #SkeletonKing
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: '2013400105'!
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+SkeletonKing class
+	instanceVariableNames: ''!
+
+!SkeletonKing class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 00:42'!
+new
+	|hero|
+	hero := self basicNew.
+	hero setDefaults.
+	hero setMaxHp: 2270.
+	hero setMaxMana: 993.
+	hero setHp: 2270.
+	hero setMana: 993.
+	hero setArmor: 11.
+	hero setMinDamage: 151 setMaxDamage: 153.
+	hero createInitialLists.
+	hero setSkill1: (WraithfireBlast new) setSkill2: (VampiricAura new).
+	^hero.! !
+
+
+Dota subclass: #Skill
+	instanceVariableNames: 'isPassive remainingCooldownTurn cooldownTurn remainingEffectTurn effectTurn manaUsage manaUsageTurn damage healsWithDamagePerc enemyAttackDescPerc damageDoubleChance damageTripleChance damageQuadChance enemyManaDescPerc evasionChance chance enemyManaDescPerAttack missingManaToDamagePerc spellDamage selfDamageDoubleChance'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: '2013400105'!
+
+!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 15:25'!
+getDamage
+	^damage.! !
+
+!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 15:24'!
+getIsPassive
+	^isPassive.! !
+
+!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 15:33'!
+setEffectTurn: initial
+	effectTurn := initial.! !
+
+!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 15:33'!
+setChance: initial
+	chance := initial.! !
+
+!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 15:30'!
+getSpellDamage
+	^spellDamage.! !
+
+!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 15:32'!
+setRemainingCooldownTurn: initial
+	remainingCooldownTurn := initial.! !
+
+!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 15:32'!
+setIsPassive: initial
+	isPassive := initial.! !
+
+!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 15:34'!
+setMissingManaToDamagePerc: initial
+	missingManaToDamagePerc := initial.! !
+
+!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 16:00'!
+getSelfDamageDoubleChance
+	^selfDamageDoubleChance.! !
+
+!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/18/2017 22:47'!
+getDamageQuadChance
+	^damageQuadChance.! !
+
+!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/18/2017 22:50'!
+setDamageDoubleChange: double triple: triple quad: quad
+	damageDoubleChance  := double.
+	damageTripleChance := triple.
+	damageQuadChance := quad.! !
+
+!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 15:27'!
+getRemainingEffectTurn
+	^remainingEffectTurn.! !
+
+!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 15:32'!
+setManaUsage: initial
+	manaUsage := initial.! !
+
+!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 15:33'!
+setSelfDamageDoubleChance: initial
+	selfDamageDoubleChance := initial.! !
+
+!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 15:28'!
+getChance
+	^chance.! !
+
+!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 15:27'!
+getEvasionChance
+	^evasionChance.! !
+
+!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 15:34'!
+setSpellDamage: initial
+	spellDamage := initial.! !
+
+!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 19:41'!
+setManaUsageTurn: initial
+	manaUsageTurn := initial.! !
+
+!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 15:33'!
+setRemainingEffectTurn: initial
+	remainingEffectTurn := initial.! !
+
+!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 19:41'!
+setDefaults
+	self setIsPassive: false.
+	self setDamage: 0.
+	self setManaUsage: 0.
+	self setRemainingCooldownTurn: 0.
+	self setCooldownTurn: 0.
+	self setRemainingEffectTurn: 0.
+	self setEffectTurn: 0.
+	self setHealsWithDamagePerc: 0.
+	self setEnemyAttackDescPerc: 0.
+	self setDamageDoubleChange: 0 triple: 0 quad: 0.
+	self setEnemyManaDescPerc: 0.
+	self setEnemyManaDescPerAttack: 0.
+	self setEvasionChance: 0.
+	self setChance: 100.
+	self setEnemyManaDescPerc: 0.
+	self setMissingManaToDamagePerc: 0.
+	self setSpellDamage: 0.
+	self setManaUsageTurn: 0.
+	self setSelfDamageDoubleChance: 0.	! !
+
+!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 15:26'!
+getRemainingCooldownTurn
+	^remainingCooldownTurn.! !
+
+!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 15:32'!
+setHealsWithDamagePerc: initial
+	healsWithDamagePerc := initial.! !
+
+!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 16:00'!
+setEnemyAttackDescPerc: initial
+	enemyAttackDescPerc := initial.! !
+
+!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 15:27'!
+getEnemyManaDescPerAttack
+	^enemyManaDescPerAttack.! !
+
+!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 15:25'!
+getManaUsage
+	^manaUsage.! !
+
+!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 15:29'!
+getMissingManaToDamagePerc
+	^missingManaToDamagePerc.! !
+
+!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 15:27'!
+getEffectTurn
+	^effectTurn.! !
+
+!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/18/2017 22:47'!
+getDamageDoubleChance
+	^damageDoubleChance.! !
+
+!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 15:33'!
+setEvasionChance: initial
+	evasionChance := initial.! !
+
+!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 15:27'!
+getCooldownTurn
+	^cooldownTurn.! !
+
+!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 15:28'!
+getEnemyManaDescPerc
+	^enemyManaDescPerc.! !
+
+!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 15:26'!
+getHealsWithDamagePerc
+	^healsWithDamagePerc.! !
+
+!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 19:41'!
+getManaUsageTurn
+	^manaUsageTurn.! !
+
+!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 15:33'!
+setCooldownTurn: initial
+	cooldownTurn := initial.! !
+
+!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 16:00'!
+getEnemyAttackDescPerc
+	^enemyAttackDescPerc.! !
+
+!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 15:33'!
+setEnemyManaDescPerc: initial
+	enemyManaDescPerc := initial.! !
+
+!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 15:33'!
+setEnemyManaDescPerAttack: initial
+	enemyManaDescPerAttack := initial.! !
+
+!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 15:32'!
+setDamage: initial
+	damage := initial.! !
+
+!Skill methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/18/2017 22:47'!
+getDamageTripleChance
+	^damageTripleChance.! !
+
+
+Skill subclass: #AnchorSmash
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: '2013400105'!
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+AnchorSmash class
+	instanceVariableNames: ''!
+
+!AnchorSmash class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 00:49'!
+new
+	|skill|
+	skill := self basicNew.
+	skill setDefaults.
+	skill setDamage: 225.
+	skill setEnemyAttackDescPerc: 60.
+	skill setCooldownTurn: 3.
+	skill setManaUsage: 60.
+	skill setEffectTurn: 1.
+	^skill.! !
+
+
+Skill subclass: #Blur
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: '2013400105'!
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+Blur class
+	instanceVariableNames: ''!
+
+!Blur class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 16:49'!
+new
+	|skill|
+	skill := self basicNew.
+	skill setDefaults.
+	skill setIsPassive: true.
+	skill setEvasionChance: 40.
+	^skill.! !
+
+
+Skill subclass: #CoupDeGrace
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: '2013400105'!
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+CoupDeGrace class
+	instanceVariableNames: ''!
+
+!CoupDeGrace class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/18/2017 22:50'!
+new
+	|skill|
+	skill := self basicNew.
+	skill setDefaults.
+	skill setIsPassive: true.
+	skill setDamageDoubleChange: 0 triple: 0 quad: 15.
+	^skill.! !
+
+
+Skill subclass: #EarthSpike
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: '2013400105'!
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+EarthSpike class
+	instanceVariableNames: ''!
+
+!EarthSpike class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 16:50'!
+new
+	|skill|
+	skill := self basicNew.
+	skill setDefaults.
+	skill setDamage: 260.
+	skill setCooldownTurn: 5.
+	skill setManaUsage: 160.
+	^skill.! !
+
+
+Skill subclass: #EnchantTotem
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: '2013400105'!
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+EnchantTotem class
+	instanceVariableNames: ''!
+
+!EnchantTotem class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/18/2017 22:51'!
+new
+	|skill|
+	skill := self basicNew.
+	skill setDefaults.
+	skill setDamageDoubleChange: 0 triple: 0 quad: 100.
+	skill setCooldownTurn: 5.
+	skill setManaUsage: 50.
+	skill setEffectTurn: 1.
+	^skill.! !
+
+
+Skill subclass: #FingerOfDeath
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: '2013400105'!
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+FingerOfDeath class
+	instanceVariableNames: ''!
+
+!FingerOfDeath class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 16:50'!
+new
+	|skill|
+	skill := self basicNew.
+	skill setDefaults.
+	skill setDamage: 850.
+	skill setCooldownTurn: 8.
+	skill setManaUsage: 650.
+	^skill.! !
+
+
+Skill subclass: #Fireblast
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: '2013400105'!
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+Fireblast class
+	instanceVariableNames: ''!
+
+!Fireblast class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 22:24'!
+new
+	|skill|
+	skill := self basicNew.
+	skill setDefaults.
+	skill setDamage: 220.
+	skill setCooldownTurn: 5.
+	skill setManaUsage: 225.
+	skill setSelfDamageDoubleChance: 60.
+	^skill.! !
+
+
+Skill subclass: #Fissure
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: '2013400105'!
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+Fissure class
+	instanceVariableNames: ''!
+
+!Fissure class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 16:50'!
+new
+	|skill|
+	skill := self basicNew.
+	skill setDefaults.
+	skill setDamage: 260.
+	skill setCooldownTurn: 5.
+	skill setManaUsage: 170.
+	^skill.! !
+
+
+Skill subclass: #FreezingField
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: '2013400105'!
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+FreezingField class
+	instanceVariableNames: ''!
+
+!FreezingField class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 16:50'!
+new
+	|skill|
+	skill := self basicNew.
+	skill setDefaults.
+	skill setDamage: 800.
+	skill setCooldownTurn: 8.
+	skill setManaUsage: 600.
+	^skill.! !
+
+
+Skill subclass: #FrostBite
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: '2013400105'!
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+FrostBite class
+	instanceVariableNames: ''!
+
+!FrostBite class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 16:50'!
+new
+	|skill|
+	skill := self basicNew.
+	skill setDefaults.
+	skill setDamage: 300.
+	skill setCooldownTurn: 5.
+	skill setManaUsage: 150.
+	^skill.! !
+
+
+Skill subclass: #GodsStrength
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: '2013400105'!
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+GodsStrength class
+	instanceVariableNames: ''!
+
+!GodsStrength class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/18/2017 22:52'!
+new
+	|skill|
+	skill := self basicNew.
+	skill setDefaults.
+	skill setDamageDoubleChange: 100 triple: 0 quad: 0.
+	skill setEffectTurn: 3.
+	skill setCooldownTurn: 5.
+	skill setManaUsage: 200.
+	^skill.! !
+
+
+Skill subclass: #Impale
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: '2013400105'!
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+Impale class
+	instanceVariableNames: ''!
+
+!Impale class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 16:50'!
+new
+	|skill|
+	skill := self basicNew.
+	skill setDefaults.
+	skill setDamage: 260.
+	skill setCooldownTurn: 5.
+	skill setManaUsage: 225.
+	^skill.! !
+
+
+Skill subclass: #ManaBreak
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: '2013400105'!
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+ManaBreak class
+	instanceVariableNames: ''!
+
+!ManaBreak class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 19:58'!
+new
+	|skill|
+	skill := self basicNew.
+	skill setDefaults.
+	skill setIsPassive: true.
+	skill setEnemyManaDescPerAttack: 100.
+	^skill.! !
+
+
+Skill subclass: #ManaBurn
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: '2013400105'!
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+ManaBurn class
+	instanceVariableNames: ''!
+
+!ManaBurn class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 16:51'!
+new
+	|skill|
+	skill := self basicNew.
+	skill setDefaults.
+	skill setEnemyManaDescPerc: 20.
+	skill setCooldownTurn: 5.
+	skill setManaUsage: 50.
+	^skill.! !
+
+
+Skill subclass: #ManaVoid
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: '2013400105'!
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+ManaVoid class
+	instanceVariableNames: ''!
+
+!ManaVoid class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 16:51'!
+new
+	|skill|
+	skill := self basicNew.
+	skill setDefaults.
+	skill setMissingManaToDamagePerc: 1.1.
+	skill setCooldownTurn: 7.
+	skill setManaUsage: 275.
+	^skill.! !
+
+
+Skill subclass: #Multicast
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: '2013400105'!
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+Multicast class
+	instanceVariableNames: ''!
+
+!Multicast class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 19:15'!
+new
+	|skill|
+	skill := self basicNew.
+	skill setDefaults.
+	skill setIsPassive: true.
+	^skill.! !
+
+
+Skill subclass: #PulseNova
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: '2013400105'!
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+PulseNova class
+	instanceVariableNames: ''!
+
+!PulseNova class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 19:41'!
+new
+	|skill|
+	skill := self basicNew.
+	skill setDefaults.
+	skill setManaUsageTurn: 150.
+	skill setSpellDamage: 50.
+	skill setEffectTurn: 999999.
+	^skill.! !
+
+
+Skill subclass: #Ravage
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: '2013400105'!
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+Ravage class
+	instanceVariableNames: ''!
+
+!Ravage class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 16:51'!
+new
+	|skill|
+	skill := self basicNew.
+	skill setDefaults.
+	skill setDamage: 380.
+	skill setCooldownTurn: 8.
+	skill setManaUsage: 325.
+	^skill.! !
+
+
+Skill subclass: #SacredArrow
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: '2013400105'!
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+SacredArrow class
+	instanceVariableNames: ''!
+
+!SacredArrow class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 16:51'!
+new
+	|skill|
+	skill := self basicNew.
+	skill setDefaults.
+	skill setDamage: 320.
+	skill setCooldownTurn: 3.
+	skill setChance: 75.
+	skill setManaUsage: 100.
+	^skill.! !
+
+
+Skill subclass: #SplitEarth
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: '2013400105'!
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+SplitEarth class
+	instanceVariableNames: ''!
+
+!SplitEarth class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 16:51'!
+new
+	|skill|
+	skill := self basicNew.
+	skill setDefaults.
+	skill setDamage: 300.
+	skill setCooldownTurn: 5.
+	skill setManaUsage: 160.
+	^skill.! !
+
+
+Skill subclass: #Starstorm
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: '2013400105'!
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+Starstorm class
+	instanceVariableNames: ''!
+
+!Starstorm class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 16:51'!
+new
+	|skill|
+	skill := self basicNew.
+	skill setDefaults.
+	skill setDamage: 300.
+	skill setCooldownTurn: 4.
+	skill setManaUsage: 160.
+	^skill.! !
+
+
+Skill subclass: #StormHammer
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: '2013400105'!
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+StormHammer class
+	instanceVariableNames: ''!
+
+!StormHammer class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 16:51'!
+new
+	|skill|
+	skill := self basicNew.
+	skill setDefaults.
+	skill setDamage: 325.
+	skill setCooldownTurn: 5.
+	skill setManaUsage: 140.
+	^skill.! !
+
+
+Sentinel subclass: #Sven
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: '2013400105'!
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+Sven class
+	instanceVariableNames: ''!
+
+!Sven class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 00:44'!
+new
+	|hero|
+	hero := self basicNew.
+	hero setDefaults.
+	hero setMaxHp: 2198.
+	hero setMaxMana: 874.
+	hero setHp: 2198.
+	hero setMana: 874.
+	hero setArmor: 14.
+	hero setMinDamage: 149 setMaxDamage: 151.
+	hero createInitialLists.
+	hero setSkill1: (StormHammer new) setSkill2: (GodsStrength new).
+	^hero.! !
+
+
+Scourge subclass: #Tidehunter
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: '2013400105'!
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+Tidehunter class
+	instanceVariableNames: ''!
+
+!Tidehunter class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/20/2017 00:42'!
+new
+	|hero|
+	hero := self basicNew.
+	hero setDefaults.
+	hero setMaxHp: 2316.
+	hero setMaxMana: 998.
+	hero setHp: 2316.
+	hero setMana: 998.
+	hero setArmor: 11.
+	hero setMinDamage: 139 setMaxDamage: 145.
+	hero createInitialLists.
+	hero setSkill1: (AnchorSmash new) setSkill2: (Ravage new).
+	^hero.! !
+
+
+Skill subclass: #VampiricAura
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: '2013400105'!
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+VampiricAura class
+	instanceVariableNames: ''!
+
+!VampiricAura class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 16:51'!
+new
+	|skill|
+	skill := self basicNew.
+	skill setDefaults.
+	skill setIsPassive: true.
+	skill setHealsWithDamagePerc: 15.
+	^skill.! !
+
+
+Item subclass: #Vanguard
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: '2013400105'!
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+Vanguard class
+	instanceVariableNames: ''!
+
+!Vanguard class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 10:36'!
+new
+	|item|
+	item := self basicNew.
+	item setDefaults.
+	item setCost: 2500.
+	item setWeight: 1.0.
+	item setMaxHpInc: 250.
+	item setDamageDesc60Chance: 20.
+	^item.! !
+
+
+Item subclass: #VitalyBooster
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: '2013400105'!
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+VitalyBooster class
+	instanceVariableNames: ''!
+
+!VitalyBooster class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/19/2017 10:37'!
+new
+	|item|
+	item := self basicNew.
+	item setDefaults.
+	item setCost: 1200.
+	item setWeight: 1.0.
+	item setMaxHpInc: 250.
+	^item.! !
+
+
+Skill subclass: #WraithfireBlast
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: '2013400105'!
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+WraithfireBlast class
+	instanceVariableNames: ''!
+
+!WraithfireBlast class methodsFor: 'as yet unclassified' stamp: 'EnesCakir 5/17/2017 16:51'!
+new
+	|skill|
+	skill := self basicNew.
+	skill setDefaults.
+	skill setDamage: 300.
+	skill setCooldownTurn: 5.
+	skill setManaUsage: 140.
+	^skill.! !
