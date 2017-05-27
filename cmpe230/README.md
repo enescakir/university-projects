@@ -5,3 +5,4 @@
 
 ### [Project 1](/cmpe230/project1) `C++`
 ### [Project 2](/cmpe230/project2) `Python`
+### [Project 3](/cmpe230/project3) `Qt / C++`

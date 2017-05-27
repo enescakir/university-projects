@@ -14,6 +14,7 @@ Programming projects that I have written at university
 ### [CmpE230 - Systems Programming](/cmpe230)
 - [Project 1](/cmpe230/project1) `C++`
 - [Project 2](/cmpe230/project2) `Python 3`
+- [Project 3](/cmpe230/project3) `Qt / C++`
 
 ### [CmpE240 - Digital Systems](/cmpe240)
 - [Experiment 1 Preliminary Work](/cmpe240/exp1) `Verilog`
