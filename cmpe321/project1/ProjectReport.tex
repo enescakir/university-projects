@@ -1,0 +1,327 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage[boxruled, linesnumbered]{algorithm2e}
+
+\title{CmpE321}
+\author{Mustafa Enes Çakır}
+\date{July 2017}
+
+
+\begin{document}
+
+\begin{titlepage}
+
+\newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
+
+\center % Center everything on the page
+
+%----------------------------------------------------------------------------------------
+%   HEADING SECTIONS
+%----------------------------------------------------------------------------------------
+
+\textsc{\LARGE BOĞAZİÇİ UNIVERSITY}\\[1.5cm] % Name of your university/college
+\textbf{\Large CMPE 321}\\[0.5cm] % Major heading such as course name
+\textsc{\large PROJECT 1}\\[2cm] % Minor heading such as course title
+\textsc{\large Summer 2017}\\[3cm] % Minor heading such as course title
+
+%----------------------------------------------------------------------------------------
+%   TITLE SECTION
+%----------------------------------------------------------------------------------------
+
+\HRule \\[0.4cm]
+{ \huge \bfseries Storage Manager Design}\\[0.4cm] % Title of your document
+\HRule \\[4cm]
+
+%----------------------------------------------------------------------------------------
+%   AUTHOR SECTION
+%----------------------------------------------------------------------------------------
+
+\Large Mustafa Enes ÇAKIR \\ [3cm] % Your name
+
+%----------------------------------------------------------------------------------------
+%   DATE SECTION
+%----------------------------------------------------------------------------------------
+
+{\large July 10, 2017}\\[2cm] % Date, change the \today to a set date if you want to be precise
+\vfill % Fill the rest of the page with whitespace
+\end{titlepage}
+
+\tableofcontents{}
+
+\break
+
+\section{Introduction}
+    A storage manager is a program that controls how the memory will be used to save data to increase the efficiency of a system.
+    In this project, I have designed a Storage Manager System without error checking. This document consists of the design details for a simple database
+    management system, including data structures, explanations and implementations (in pseudo-code) of the available database operations.
+    According to my design, there is a system catalog which stores metadata, and multiple data files that store actual data. I have constructed the system in a way that to allocate a different page for each type. The storage manager will keep the datas in typeName.txt and SysCat.cat will be the guide for the system catalogue. The records in a file are divided into unit collections (pages) in abstraction.
+\section{Assumptions \& Constraints}
+        \begin{itemize}
+            \item Page will be 1400 bytes.
+            \item Every character is 1 byte.
+            \item All of the field values are integer.
+            \item A data type can contain 10 fields provided by user exactly. More fields is not allowed, yet if it contains less field, the remaining fields are considered as null.
+            \item A page will contain at most one type of record.
+            \item Field names are at most 12 characters long.
+            \item No two fields of a data type have the same name.
+            \item Data files have the format <type-name>.txt.
+            \item A data file can contain multiple pages.
+            \item System catalog file has the name SysCat.txt.
+        \end{itemize}
+
+\section{Data Structures}
+    This design contains two main components which are System Catalogue and Data Files.
+    \subsection{System Catalogue}
+        System catalogue is responsible for storing the metadata. It's a blueprint for datas. It has multiple pages. Each record has a fixed size. Each type has 10 fields. Therefore, the space of each record in the system catalog is 133 bytes. So 10 data type records can be stored in a page.
+
+        \begin{itemize}
+          \item Page Header (8 bytes)
+            \begin{itemize}
+                 \item Page ID (4 bytes)
+                 \item \# of Records (4 bytes)
+            \end{itemize}
+          \item Record (133 bytes)
+            \begin{itemize}
+                 \item Record Header (13 bytes)
+                    \begin{itemize}
+                        \item Type Name (12 bytes)
+                        \item \# of Fields (1 byte)
+                    \end{itemize}
+                 \item Field Names (10 x 12 = 120 bytes)
+            \end{itemize}
+        \end{itemize}
+
+        \begin{table}[h!]
+                \begin{center}
+                    \begin{tabular}{ | c | c | c | c | c | c | }
+                    \hline
+                        \multicolumn{3}{||c|}{Page ID} &
+                        \multicolumn{3}{|c||}{\# of Records} \\
+                    \hline
+                    \hline
+                    Type Name 1 & \# of Fields & Field Name 1 & Field Name 2 & ... & Field Name 10 \\
+                    \hline
+                    Type Name 2 & \# of Fields & Field Name 1 & Field Name 2 & ... & Field Name 10 \\
+                    \hline
+                    ... & ... & ... & ... & ... & ... \\
+                    \hline
+                    Type Name 10 & \# of Fields & Field Name 1 & Field Name 2 & ... & Field Name 10 \\
+                    \hline
+                    \end{tabular}
+                \end{center}
+            \caption{a Page of a System Catalogue \emph{(Starting with the Page Header)}}
+            \label{table:1}
+        \end{table}
+
+    \subsection{Data Files}
+        Data files store actual datas. In this storage manager system, data files are separated into the number of types. Each data file can store one type of record and is named with that type. \emph{"hamster.txt"} can store only the records of type \emph{hamster} for example. These records can be thought as instances of a type in the system catalog. Therefore the fields of the records are actual values. Here, all the values are integer. A record in a data file has a space of 45 bytes. Each page in a data file can store 30 records at most.
+        \subsubsection{Pages}
+            Page headers store information about the specific page it belongs to.
+            \begin{itemize}
+              \item Page Header (13 bytes)
+                \begin{itemize}
+                     \item Page ID (4 bytes)
+                    \item Pointer to Next Page (4 bytes)
+                     \item \# of Records (4 bytes)
+                     \item isEmpty (1 byte)
+                \end{itemize}
+              \item Records (a Record = 45 bytes)
+            \end{itemize}
+        \subsubsection{Records}
+            \begin{itemize}
+              \item Record Header (5 bytes)
+                \begin{itemize}
+                     \item Record ID (4 bytes)
+                    \item isEmpty (1 bytes)
+                \end{itemize}
+              \item Fields (10 x 4 = 40 bytes)
+            \end{itemize}
+
+        \begin{table}[h!]
+            \begin{center}
+                \begin{tabular}{ | c | c | c | c | c | c | }
+                \hline
+                    \multicolumn{1}{||c|}{Page ID} &
+                    \multicolumn{2}{|c|}{Pointer to Next Page} &
+                    \multicolumn{2}{|c|}{\# of Records} &
+                    \multicolumn{1}{|c||}{isEmpty} \\
+                \hline
+                \hline
+                Record ID 1 & isEmpty & Field 1 & Field 2 & ... & Field 10 \\
+                \hline
+                Record ID 2 & isEmpty & Field 1 & Field 2 & ... & Field 10 \\
+                \hline
+                ... & ... & ... & ... & ... & ... \\
+                \hline
+                Record ID 30 & isEmpty & Field 1 & Field 2 & ... & Field 10 \\
+                \hline
+                \end{tabular}
+            \end{center}
+    \caption{Page of a Data File \emph{(Starting with the Page Header)}}
+    \label{table:1}
+    \end{table}
+
+\section{Algorithms}
+    \subsection{DDL Operations}
+        Database Design Language \emph{(DDL)} operations are generally is related to system catalogue. As we have declared.
+        \subsubsection{Create a type}
+        \IncMargin{1em}
+            \begin{algorithm}[H]
+                \SetNlSty{texttt}{}{:}
+                \SetAlgoLined
+                 \textbf{declare} dataType \\
+                 nameOfType $\leftarrow$ User Input \\
+                 numberOfFields $\leftarrow$ User Input \\
+                 dataType.push(nameOfType, numberOfFields) \\
+                 \For{0 to numberOfFields}{
+                    nameOfField $\leftarrow$ User Input \\
+                    dataType.push(nameOfField)
+                 }
+                 \For{numberOfFields to 10}{
+                    dataType.push(NULL)
+                 }
+                 file $\leftarrow$ open("SysCat.txt") \\
+                 file.push(dataType) \\
+                 createFile(nameOfType.txt)
+                 \caption{Creating Data Type}
+            \end{algorithm}
+        \DecMargin{1em}
+        \subsubsection{Delete a type}
+        \IncMargin{1em}
+            \begin{algorithm}[H]
+                \SetNlSty{texttt}{}{:}
+                \SetAlgoLined
+                 nameOfType $\leftarrow$ User Input \\
+                 deleteFile(nameOfType.txt) \\
+                 file $\leftarrow$ open("SysCat.txt") \\
+                 \ForEach{ page in file}{
+                    \ForEach{ record in page }{
+                         \If{record.isEmpty = 0 \textbf{and} record.typeName = nameOfType}{
+                            record.isEmpty $\leftarrow$ 1 \\
+                            break
+                         }
+                    }
+                 }
+                 \caption{Deleting Data Type}
+            \end{algorithm}
+        \DecMargin{1em}
+        \subsubsection{List all types}
+            \IncMargin{1em}
+                \begin{algorithm}[H]
+                    \SetNlSty{texttt}{}{:}
+                    \SetAlgoLined
+                     file $\leftarrow$ open("SysCat.txt") \\
+                     \ForEach{ page in file}{
+                        \ForEach{ record in page }{
+                             \If{record.isEmpty = 0 }{
+                                print(record.typeName) \\
+                             }
+                        }
+                     }
+                     \caption{Listing Data Types}
+                \end{algorithm}
+            \DecMargin{1em}
+
+    \subsection{DML Operations}
+     Database Manipulation Language \emph{(DML)} are generally is related to data files.
+        \subsubsection{Create a record}
+            \IncMargin{1em}
+                \begin{algorithm}[H]
+                    \SetNlSty{texttt}{}{:}
+                    \SetAlgoLined
+                    recordType $\leftarrow$ User Input \\
+                    fieldNum $\leftarrow$ getFieldNum(recordType, "SysCat.txt") \\
+                    file $\leftarrow$ open(recordType.txt) \\
+                    \ForEach{ currentPage in file}{
+                        \If{currentPage.numOfRecords != 30}{
+                            page $\leftarrow$  currentPage \\
+                            break
+                        }
+                    }
+                    \ForEach{record in page}{
+                        \If{record.isEmpty = 1}{
+                            record.isEmpty  $\leftarrow$ 0 \\
+                            \For{i $\leftarrow$ 0 to fieldNum}{
+                                record[i + 2] $\leftarrow$ User Input
+                            }
+                            page.numOfRecords++ \\
+                            break
+                        }
+                    }
+                     \caption{Creating Record}
+                \end{algorithm}
+            \DecMargin{1em}
+        \subsubsection{Delete a record}
+            \IncMargin{1em}
+                \begin{algorithm}[H]
+                    \SetNlSty{texttt}{}{:}
+                    \SetAlgoLined
+                    recordType $\leftarrow$ User Input \\
+                    recordID $\leftarrow$ User Input \\
+                    file $\leftarrow$ open(recordType.txt) \\
+                    \ForEach{ page in file}{
+                        \ForEach{record in page}{
+                            \If{record.isEmpty = 0 \textbf{and} record.id = recordID  }{
+                                record.isEmpty  $\leftarrow$ 1 \\
+                                page.numOfRecords-- \\
+                                break
+                            }
+                        }
+                    }
+                     \caption{Deleting Record}
+                \end{algorithm}
+            \DecMargin{1em}
+        \subsubsection{Search for a record}
+            \IncMargin{1em}
+                \begin{algorithm}[H]
+                    \SetNlSty{texttt}{}{:}
+                    \SetAlgoLined
+                    recordType $\leftarrow$ User Input \\
+                    recordID $\leftarrow$ User Input \\
+                    file $\leftarrow$ open(recordType.txt) \\
+                    \ForEach{ page in file}{
+                        \ForEach{record in page}{
+                            \If{record.isEmpty = 0 \textbf{and} record.id = recordID  }{
+                                \textbf{return} record
+                            }
+                        }
+                    }
+                     \caption{Deleting Record}
+                \end{algorithm}
+            \DecMargin{1em}
+        \subsubsection{List all records of a type}
+            \IncMargin{1em}
+                \begin{algorithm}[H]
+                    \SetNlSty{texttt}{}{:}
+                    \SetAlgoLined
+                    \textbf{declare} records \\
+                    recordType $\leftarrow$ User Input \\
+                    file $\leftarrow$ open(recordType.txt) \\
+                    \ForEach{ page in file}{
+                        \ForEach{record in page}{
+                            \If{record.isEmpty = 0  }{
+                                records.push(record)
+                            }
+                        }
+                    }
+                    \textbf{return} records
+                     \caption{Listing All Records}
+                \end{algorithm}
+            \DecMargin{1em}
+\section{Conclusions \& Assessment}
+    In this documentation a storage manager design is proposed where size of each
+structure is fixed. This creates an inefficiency in terms of memory usage while
+it makes the storage manager easier to implement. I allocated 1400 Bytes space for pages however the system only uses 1363 Bytes, this is done for Reliability.  Also note that, the pages
+and records are inserted to storage manager linearly without any specific order. This makes searching slower whereas it makes
+insertion faster. It's faster when listing records. \\
+    This restricts the user to some extent, however it makes the storage manager
+faster since the length controls are unnecessary, no checking for identical key is
+needed. \\
+    \\
+    To sum up, this design has its own ups and downs just like every design.
+Since it is kept as a simple one, it is easy to modify and improve. Hence,
+implementing it would also be easier with necessary modifications that can be
+realized on the run.
+\end{document}
