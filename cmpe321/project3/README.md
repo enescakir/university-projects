@@ -11,11 +11,15 @@ I developed my own little PHP framework. It is heavily inspired from Laravel Fra
 - To create database scheme visit `localhost:8888/database`
 - First administrator activated automatically
 
-![Login page](/cmpe321/project3/report/cmpe321_p3_ss1.png)
-![Airport listing](/cmpe321/project3/report/cmpe321_p3_ss2.png)
-![Flight listing](/cmpe321/project3/report/cmpe321_p3_ss4.png)
-![Adding new flight](/cmpe321/project3/report/cmpe321_p3_ss6.png)
-![Choosing seat for reservation](/cmpe321/project3/report/cmpe321_p3_ss7.png)
+<img src="/cmpe321/project3/report/cmpe321_p3_ss1.png" width="70%">
+
+<img src="/cmpe321/project3/report/cmpe321_p3_ss2.png" width="70%">
+
+<img src="/cmpe321/project3/report/cmpe321_p3_ss4.png" width="70%">
+
+<img src="/cmpe321/project3/report/cmpe321_p3_ss6.png" width="70%">
+
+<img src="/cmpe321/project3/report/cmpe321_p3_ss7.png" width="70%">
 
 ### Structure
 Entry point of my application is index.php. After that point, my `Router` handles routing.
@@ -27,5 +31,7 @@ I have 3 important directory.
 
 ### Further Developments
 You can use this framework in your CmpE321 project easily. If you're not sure what you're doing, don't touch the `Core` folder.
+
 Your main workspace is `App` folder. Add your project's routes, models, controllers and views to corresponding folders.
+
 **Note:** Don't forget to update your autoload file with `composer dumpautoload` after you added new files.
