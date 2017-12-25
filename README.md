@@ -30,10 +30,13 @@ Programming projects that I have written at university
 - [Project 4](/cmpe250/project4) `C++`
 - [Project 5](/cmpe250/project5) `C++`
 
-### [CmpE260 - Principles Of Programming Languages](/cmpe260)
+### [CmpE260 - Principles of Programming Languages](/cmpe260)
 - [Project 1](/cmpe260/project1) `Prolog`
 - [Project 2](/cmpe260/project2) `Scheme`
 - [Project 3](/cmpe260/project3) `Smalltalk`
+
+### [CmpE300 - Analysis of Algorithms](/cmpe300)
+- [Application Project](/cmpe300) `MPI / C++`
 
 ### [CmpE321 - Introduction to Database Systems](/cmpe321)
 - [Project 1](/cmpe321/project1) `Latex`
