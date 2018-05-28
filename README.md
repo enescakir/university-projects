@@ -52,5 +52,10 @@ Programming projects that I have written at university
 - [Project 1](/cmpe362/project1) `Matlab`
 - [Project 2](/cmpe362/project2) `Matlab`
 - [Project 3](/cmpe362/project3) `Matlab`
+- 
+### [CmpE493 - Introduction to Information Retrieval](/cmpe493)
+- [Project 1](/cmpe493/project1) `Python`
+- [Project 2](/cmpe493/project2) `Python`
+- [Project 3](/cmpe493/project3) `Python`
 
 ### [CmpE352 & CmpE451 - Project Development in Software Engineering](https://github.com/bounswe/bounswe2017group11)
