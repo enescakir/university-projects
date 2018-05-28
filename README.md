@@ -43,9 +43,14 @@ Programming projects that I have written at university
 - [Project 2](/cmpe321/project2) `Java`
 - [Project 3](/cmpe321/project3) `PHP`
 - 
-### [CmpE322 - OPERATING SYSTEMS](/cmpe322)
+### [CmpE322 - Operating Systems](/cmpe322)
 - [Project 1](/cmpe322/project1) `C++`
 - [Project 2](/cmpe322/project2) `C++`
 - [Project 3](/cmpe322/project3) `C++`
+- 
+### [CmpE362 - Intro to Signal Processing](/cmpe362)
+- [Project 1](/cmpe362/project1) `Matlab`
+- [Project 2](/cmpe362/project2) `Matlab`
+- [Project 3](/cmpe362/project3) `Matlab`
 
 ### [CmpE352 & CmpE451 - Project Development in Software Engineering](https://github.com/bounswe/bounswe2017group11)
