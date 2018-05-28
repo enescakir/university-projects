@@ -42,5 +42,10 @@ Programming projects that I have written at university
 - [Project 1](/cmpe321/project1) `Latex`
 - [Project 2](/cmpe321/project2) `Java`
 - [Project 3](/cmpe321/project3) `PHP`
+- 
+### [CmpE322 - OPERATING SYSTEMS](/cmpe322)
+- [Project 1](/cmpe322/project1) `C++`
+- [Project 2](/cmpe322/project2) `C++`
+- [Project 3](/cmpe322/project3) `C++`
 
 ### [CmpE352 & CmpE451 - Project Development in Software Engineering](https://github.com/bounswe/bounswe2017group11)

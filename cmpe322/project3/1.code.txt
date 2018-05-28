@@ -1,0 +1,11 @@
+instr1	20
+instr2	30
+dispM_0	200
+instr3	10
+instr4	30
+dispM_0	140
+instr5	50
+instr6	20
+instr7	10
+dispM_1	160
+exit	10

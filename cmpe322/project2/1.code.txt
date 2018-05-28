@@ -1,0 +1,10 @@
+instr1	20
+instr2	30
+waitS_4	0
+instr3	10
+instr4	30
+instr5	50
+instr6	20
+instr7	10
+signS_4	0
+exit	10
