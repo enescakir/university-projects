@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Auctioner</string>
+    <string name="date_format">yyyy-MM-dd HH:mm:ss</string>
+</resources>

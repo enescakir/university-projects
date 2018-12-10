@@ -1,0 +1,58 @@
+[
+  {
+    "id": 1,
+    "name": "Mona Lisa Auction",
+    "description": "The Mona Lisa is a half-length portrait painting by the Italian Renaissance artist Leonardo da Vinci.",
+    "startPoint": 100,
+    "date": "2018-12-17 09:39:45"
+  },
+  {
+    "id": 2,
+    "name": "The Scream Auction",
+    "description": "The works show a figure with an agonized expression against a landscape with a tumultuous orange sky.",
+    "startPoint": 20,
+    "date": "2018-12-08 16:53:01"
+  },
+  {
+    "id": 3,
+    "name": "Wheat Field with Cypresses",
+    "description": "Very The works were inspired by the view from the window at the asylum towards the Alpilles mountains.",
+    "startPoint": 30,
+    "date": "2018-12-11 06:58:35"
+  },
+  {
+    "id": 4,
+    "name": "Byzantine Coin Auction",
+    "description": "A very popular denarius featuring the tools of minting coins.",
+    "startPoint": 400,
+    "date": "2018-12-22 04:57:50"
+  },
+  {
+    "id": 5,
+    "name": "Very Old Stamp Auction",
+    "description": "19th Century classics",
+    "startPoint": 400,
+    "date": "2019-01-01 05:07:32"
+  },
+  {
+    "id": 6,
+    "name": "Macintosh Auction",
+    "description": "The Macintosh is a family of personal computers designed, manufactured, and sold by Apple Inc. since January 1984",
+    "startPoint": 400,
+    "date": "2019-01-04 08:07:17"
+  },
+  {
+    "id": 7,
+    "name": "iPhone (1st generation)",
+    "description": "The iPhone is the first smartphone model designed and marketed by Apple Inc.",
+    "startPoint": 400,
+    "date": "2018-12-20 07:42:14"
+  },
+  {
+    "id": 8,
+    "name": "Apple Newton Auction",
+    "description": "The Newton is a series of personal digital assistants (PDA) developed and marketed by Apple Computer, Inc.",
+    "startPoint": 400,
+    "date": "2018-12-23 08:01:21"
+  }
+]

@@ -1,0 +1,4 @@
+LP status(1): optimal
+Cplex Time: 0.00sec (det. 0.06 ticks)
+Optimal solution found.
+Objective :      478490.000000

@@ -42,17 +42,17 @@ Programming projects that I have written at university
 - [Project 1](/cmpe321/project1) `Latex`
 - [Project 2](/cmpe321/project2) `Java`
 - [Project 3](/cmpe321/project3) `PHP`
-- 
+
 ### [CmpE322 - Operating Systems](/cmpe322)
 - [Project 1](/cmpe322/project1) `C++`
 - [Project 2](/cmpe322/project2) `C++`
 - [Project 3](/cmpe322/project3) `C++`
-- 
+
 ### [CmpE362 - Intro to Signal Processing](/cmpe362)
 - [Project 1](/cmpe362/project1) `Matlab`
 - [Project 2](/cmpe362/project2) `Matlab`
 - [Project 3](/cmpe362/project3) `Matlab`
-- 
+
 ### [CmpE493 - Introduction to Information Retrieval](/cmpe493)
 - [Project 1](/cmpe493/project1) `Python`
 - [Project 2](/cmpe493/project2) `Python`

@@ -1,0 +1,6 @@
+MIP Solution:       455100.000000    (10 iterations, 0 nodes)
+Final Solve:        455100.000000    (9 iterations)
+
+Best possible:      455100.000000
+Absolute gap:            0.000000
+Relative gap:            0.000000
