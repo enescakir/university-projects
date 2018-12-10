@@ -53,6 +53,19 @@ Programming projects that I have written at university
 - [Project 2](/cmpe362/project2) `Matlab`
 - [Project 3](/cmpe362/project3) `Matlab`
 
+### [CmpE436 - Concurrent and Distributed Programming](/cmpe436)
+- [Homework 1](/cmpe436/hw1) `Java`
+- [Homework 2](/cmpe436/hw2) `Java`
+- [Homework 3](/cmpe436/hw3) `Java`
+- [Homework 4](/cmpe436/hw4) `Java`
+- [Final Project](/cmpe436/final-project) `Java`
+
+### [CmpE487 - Applied Computer Networks](/cmpe487)
+- [Workshop 1](/cmpe487/bash-chat) `Bash`
+- [Workshop 2](/cmpe487/python-chat) `Python`
+- [Workshop 3](/cmpe487/zeroconf-chat) `Python`
+- [Workshop 4](/cmpe487/social-torrent) `Python`
+
 ### [CmpE493 - Introduction to Information Retrieval](/cmpe493)
 - [Project 1](/cmpe493/project1) `Python`
 - [Project 2](/cmpe493/project2) `Python`
