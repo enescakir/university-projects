@@ -16,6 +16,10 @@ brew install open-mpi
 # It might be has linking error. You can google it to fix permission error.
 brew install boost-mpi
 
+# It just works with older versions of boots
+brew install boost@1.60
+brew link --overwrite --force boost@1.60
+
 # Compile it
 mpic++ -std=c++11 main.cpp -o main.o -I/usr/local/include/ -L/usr/local/lib -lboost_mpi -lboost_serialization
 
