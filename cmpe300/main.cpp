@@ -109,7 +109,6 @@ int main(int argc, char *argv[]) {
             }
             world.send(i, 1, substrings);
         }
-		cout << "Master start" << endl;
 
         // Collect mapped word struct vectors from slaves
         vector<Word> words;
@@ -157,12 +156,10 @@ int main(int argc, char *argv[]) {
         for (int i = 0; i < reduced_words.size(); i++) {
             cout << reduced_words[i].text << " " << reduced_words[i].count << endl;
         }
-		cout << "Master end" << endl;
 	} else {
         /**
          * Slave processors works
          */
-		cout << "Client start" << endl;
 
         // Receive raw string vector
         vector<string> strings;
@@ -185,8 +182,6 @@ int main(int argc, char *argv[]) {
 
         // Send sorted vectors to master
         world.send(MASTER_PROCESSOR, 4, words_to_sort);
-		cout << "Client end" << endl;
-
 	}
     return 0;
 }
