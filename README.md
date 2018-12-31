@@ -68,6 +68,7 @@ Programming projects that I have written at university
 - [Workshop 2](/cmpe487/python-chat) `Python`
 - [Workshop 3](/cmpe487/zeroconf-chat) `Python`
 - [Workshop 4](/cmpe487/social-torrent) `Python`
+- [Final Project](/cmpe487/final-project) `Python`
 
 ### [CmpE493 - Introduction to Information Retrieval](/cmpe493)
 - [Project 1](/cmpe493/project1) `Python`
@@ -78,3 +79,9 @@ Programming projects that I have written at university
 - [Caching Alogrithm](/cmpe49f) `Python`
 
 ### [CmpE352 & CmpE451 - Project Development in Software Engineering](https://github.com/bounswe/bounswe2017group11)
+
+### [IE310 - Operations Research](/ie310)
+- [GAMS Modeling](/ie310) `GAMS`
+
+### [IE306 - Systems Simulation](/ie306)
+- [Simulation](/ie306) `Python`
