@@ -1,0 +1,10 @@
+What is the maximum bandwidth that can be supported by fiber optics cable?                       |4|10 Mbps      |50 Mbps      |100 Mbps       |2000 Mbps
+Media Access Control (MAC) and Logical Link Control (LLC) are two sublayers of _________________.|4|Session layer|Network layer|Transport layer|Data Link layer
+ARPA stands for ___________________________.|3|Advanced Research Projects Administration|Advanced Repeater Projects Agency|Advanced Research Projects Agency|Advanced Rear Projects Agency
+Limewire, Kazaa and Bearshare are all examples of ...|3|Web sites that store MP3 music files and Malware|Brand names of networking hardware products|Software applications for peer-to-peer connection (P2P) file sharing|Wireless network communication protocols
+You can make telephone calls over the Internet using a technology called ...|1|VoIP|Skynet|Intertel|Telenet
+A home computer network is sometimes also called a ...|2|MAN|LAN|SAN|WAN
+What protocol is used to find the hardware address of a local device?|2|RARP|ARP|IP|ICMP
+IPv4 IP addresses are ___ bit binary numbers?|3|2|8|32|128
+An IP address is divided into what two parts?|3|Physical and logical|Network and subnet|Network and host|Physical and emotional
+What protocol is used to automatically assign IP addresses to hosts?|3|WINS|NAT|DHCP|FTP

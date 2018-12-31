@@ -1,0 +1,10 @@
+Berlin is the capital of which country?|3|Belgium|Netherlands|Germany|Iran
+You want to make green paint. Which colors do you mix together?|2|Red and yellow|Blue and yellow|Orange and purple|White and black
+Which is the longest river in the world?|2|Amazon|Nile|Mississippi|Kızılırmak
+What language do most people in Austria speak?|1|German|Austrian|Hungarian|Turkish
+Which country is closer to the North Pole?|2|Gambia|Finland|China|North Korea
+Which chess piece is of the lowest theoretical value?|2|Knight|Pawn|Bishop|Castle
+Who was the first person on the moon?|3|John Glenn|Buzz Aldrin|Neil Armstrong|Yuri Gagarin
+When French Revolution happened?|1|1789|1453|1994|2012
+The unit of current is _________.|3|Ohm|Watt|Ampere|Tesla
+Who is the author of the From the Earth to the Moon?|4|H. G. Wells|Alexandre Dumas|Aldous Huxley|Jules Verne

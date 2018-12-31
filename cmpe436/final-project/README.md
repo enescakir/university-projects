@@ -1,8 +1,7 @@
 ## Auction App
+### [Server](/cmpe436/final-project/Server) `Java`
+### [Android App](/cmpe436/final-project/Auctioner) `Java`
 |||||
 :-------------------------:|:-------------------------:|:-------------------------:|:-------------------------:
 <a href="https://raw.githubusercontent.com/EnesCakir/university-projects/master/cmpe436/final-project/screenshots/ss1.png"><img src="https://raw.githubusercontent.com/EnesCakir/university-projects/master/cmpe436/final-project/screenshots/ss1.png"></a> | <a href="https://raw.githubusercontent.com/EnesCakir/university-projects/master/cmpe436/final-project/screenshots/ss2.png"><img src="https://raw.githubusercontent.com/EnesCakir/university-projects/master/cmpe436/final-project/screenshots/ss2.png"></a> | <a href="https://raw.githubusercontent.com/EnesCakir/university-projects/master/cmpe436/final-project/screenshots/ss3.png"><img src="https://raw.githubusercontent.com/EnesCakir/university-projects/master/cmpe436/final-project/screenshots/ss3.png"></a> | <a href="https://raw.githubusercontent.com/EnesCakir/university-projects/master/cmpe436/final-project/screenshots/ss4.png"><img src="https://raw.githubusercontent.com/EnesCakir/university-projects/master/cmpe436/final-project/screenshots/ss4.png"></a>
 <a href="https://raw.githubusercontent.com/EnesCakir/university-projects/master/cmpe436/final-project/screenshots/ss5.png"><img src="https://raw.githubusercontent.com/EnesCakir/university-projects/master/cmpe436/final-project/screenshots/ss5.png"></a> | <a href="https://raw.githubusercontent.com/EnesCakir/university-projects/master/cmpe436/final-project/screenshots/ss6.png"><img src="https://raw.githubusercontent.com/EnesCakir/university-projects/master/cmpe436/final-project/screenshots/ss6.png"></a> | <a href="https://raw.githubusercontent.com/EnesCakir/university-projects/master/cmpe436/final-project/screenshots/ss7.png"><img src="https://raw.githubusercontent.com/EnesCakir/university-projects/master/cmpe436/final-project/screenshots/ss7.png"></a> |
-
-### [Server](/cmpe436/final-project/Server) `Java`
-### [Android App](/cmpe436/final-project/Auctioner) `Java`
