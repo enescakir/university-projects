@@ -60,6 +60,9 @@ Programming projects that I have written at university
 - [Homework 4](/cmpe436/hw4) `Java`
 - [Final Project](/cmpe436/final-project) `Java`
 
+### [CmpE443 - Principles of Embedded Systems Design](https://github.com/EnesCakir/cmpe443-car-project)
+- [Car Project](https://github.com/EnesCakir/cmpe443-car-project) `C`
+
 ### [CmpE487 - Applied Computer Networks](/cmpe487)
 - [Workshop 1](/cmpe487/bash-chat) `Bash`
 - [Workshop 2](/cmpe487/python-chat) `Python`
@@ -70,5 +73,8 @@ Programming projects that I have written at university
 - [Project 1](/cmpe493/project1) `Python`
 - [Project 2](/cmpe493/project2) `Python`
 - [Project 3](/cmpe493/project3) `Python`
+
+### [CmpE49F - Introduction to Satellite Space Network](/cmpe49f)
+- [Caching Alogrithm](/cmpe49f) `Python`
 
 ### [CmpE352 & CmpE451 - Project Development in Software Engineering](https://github.com/bounswe/bounswe2017group11)
