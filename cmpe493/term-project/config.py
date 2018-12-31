@@ -1,0 +1,4 @@
+TEST = True
+HASHTAG = True
+EMOJI = True
+SPELL_CORRECTION = False

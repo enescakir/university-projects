@@ -74,6 +74,7 @@ Programming projects that I have written at university
 - [Project 1](/cmpe493/project1) `Python`
 - [Project 2](/cmpe493/project2) `Python`
 - [Project 3](/cmpe493/project3) `Python`
+- [Term Project](/cmpe493/term-project) `Python`
 
 ### [CmpE49F - Introduction to Satellite Space Network](/cmpe49f)
 - [Caching Alogrithm](/cmpe49f) `Python`
