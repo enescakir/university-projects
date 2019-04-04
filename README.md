@@ -1,4 +1,6 @@
-# My University Projects
+
+# My University Projects :school_satchel:
+### :star: Do not forget to give a star on GitHub!
 Programming projects that I have written at university
 
 ### [CmpE150 - Introduction to Computing](/cmpe150)
